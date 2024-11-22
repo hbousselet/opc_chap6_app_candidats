@@ -11,7 +11,7 @@ import SwiftUI
 struct application_candidats_chap6_opcApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            LoginView(model: LoginOperation())
         }
     }
 }

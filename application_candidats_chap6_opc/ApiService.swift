@@ -52,7 +52,7 @@ enum Endpoint {
     case get(Route?, String?)
     case put(Route?, String?)
     case delete(Route?, String?)
-    case post([String: Any])
+    case post(Route?, [String: Any])
     
     var method: Data? {
         switch self {
@@ -62,7 +62,7 @@ enum Endpoint {
             return nil
         case .delete:
             return nil
-        case let .post(parameters):
+        case .post(_, let parameters):
             return try? JSONSerialization.data(withJSONObject: parameters, options: [])
         }
     }
@@ -100,8 +100,12 @@ enum Endpoint {
             } else {
                 return ""
             }
-        default:
-            return ""
+        case .post(let route,_):
+            if let route {
+                return route.rawValue
+            } else {
+                return ""
+            }
         }
     }
 }
