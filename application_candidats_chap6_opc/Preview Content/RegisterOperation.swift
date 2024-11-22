@@ -11,7 +11,7 @@ class RegisterOperation: ObservableObject {
     @Published var email: String = ""
     @Published var password: String = ""
     @Published var firstName: String = ""
-    @Published var LastName: String = ""
+    @Published var lastName: String = ""
     
     
     @MainActor

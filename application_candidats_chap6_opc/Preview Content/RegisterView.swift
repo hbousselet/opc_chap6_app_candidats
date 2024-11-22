@@ -10,6 +10,8 @@ import SwiftUI
 struct RegisterView: View {
     @Environment(\.dismiss) private var dismiss
     
+    @EnvironmentObject var model: RegisterOperation
+    
     @State var firstName: String = ""
     @State var lastName: String = ""
     @State var email: String = ""
@@ -18,13 +20,16 @@ struct RegisterView: View {
     
     var body: some View {
         NavigationStack {
-            CustomPrompt(title: "First Name", promptValue: $firstName) {}
-            CustomPrompt(title: "Last Name", promptValue: $lastName) {}
-            CustomPrompt(title: "Email", promptValue: $email) {}
-            CustomPassword(title: "Password", promptValue: $password)
+            CustomPrompt(title: "First Name", promptValue: $model.firstName) {}
+            CustomPrompt(title: "Last Name", promptValue: $model.lastName) {}
+            CustomPrompt(title: "Email", promptValue: $model.email) {}
+            CustomPassword(title: "Password", promptValue: $model.password)
             CustomPassword(title: "Confirm Password", promptValue: $confirmedPassword)
             Button {
                 //check if creation is ok dans viewModel, si ok => dismiss
+                Task {
+                    await model.register()
+                }
                 dismiss()
             } label: {
                 Text("Create")
@@ -41,6 +46,6 @@ struct RegisterView: View {
 }
 
 
-#Preview {
-    RegisterView(firstName: "Bla", lastName: "te", email: "hd", password: "nd", confirmedPassword: "df")
-}
+//#Preview {
+//    RegisterView(firstName: "Bla", lastName: "te", email: "hd", password: "nd", confirmedPassword: "df")
+//}
