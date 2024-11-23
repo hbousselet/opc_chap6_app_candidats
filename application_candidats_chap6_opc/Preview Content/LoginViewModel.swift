@@ -19,6 +19,7 @@ class LoginOperation: ObservableObject {
             switch request {
             case .success(let response):
                 ApiService.token = response?.token
+                ApiService.isAdmin = response?.isAdmin
                 print("Successfully login with email: \(email)")
             case .failure(let error):
                 //TO DO - rajouter une alerte

@@ -33,6 +33,7 @@ struct LoginView: View {
                         .cornerRadius(10)
                 }
                 .disabled(isLoading)
+                .padding()
                 NavigationLink(isActive: $shouldNavigate) {
                     CandidatesView()
                 } label: {

@@ -15,23 +15,30 @@ struct CandidatesView: View {
     var body: some View {
         NavigationStack {
             List(viewModel.candidats) { candidat in
-                NavigationLink(candidat.lastName, value: candidat)
+                HStack {
+                    NavigationLink(candidat.lastName) {
+                        ProfilView(of: candidat)
+                    }
+                    Spacer()
+                    Image(systemName: "star")
+                        .background(candidat.isFavorite ? Color.black : Color.clear)
+                }
             }
-            .navigationDestination(for: Candidate.self) { candidat in
-                ProfilView(candidat: candidat)
-            }
+            .searchable(text: $searchText)
+            .listRowSpacing(2)
         }
         .onAppear {
             Task {
                 await viewModel.getCandidates()
             }
         }
-        .searchable(text: $searchText)
         .navigationTitle("Candidats")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button {
-                    
+                    //action for edit
                 } label: {
                     Text("Edit")
                 }

@@ -9,9 +9,10 @@ import SwiftUI
 
 class ProfilViewModel: ObservableObject {
     @Published var candidat: Candidate
+    @Published var isAdmin: Bool
     
-    init(candidat: Candidate) {
-        self.candidat = candidat
+    init(candidatToShow: Candidate) {
+        self.candidat = candidatToShow
+        self.isAdmin = ApiService.isAdmin ?? false
     }
-    
 }

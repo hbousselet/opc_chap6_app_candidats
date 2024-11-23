@@ -15,6 +15,8 @@ class ApiService {
 
     static var token: String?
     
+    static var isAdmin: Bool?
+    
     private init() {}
     
     func fetch<T: Decodable>(endpoint: Endpoint,
