@@ -16,10 +16,10 @@ class RegisterOperation: ObservableObject {
     
     @MainActor
     func register() async {
-        let parameters = ["email": self.email,
+        let parameters = ["lastName": self.firstName,
                           "password": self.password,
                           "firstName": self.firstName,
-                          "lastName": self.firstName]
+                          "email": self.email]
         
         do {
             let request = try await ApiService.shared.fetch(endpoint: .post(Route.register, parameters), responseType: Register.self)

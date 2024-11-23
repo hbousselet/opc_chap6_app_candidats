@@ -45,6 +45,7 @@ class ApiService {
         guard let decodedData = try? JSONDecoder().decode(responseType, from: data) else {
             return .failure(APIErrors.invalidDecode)
         }
+        //String(data: decodedData, encoding: .utf8)
         return .success(decodedData)
     }
 }

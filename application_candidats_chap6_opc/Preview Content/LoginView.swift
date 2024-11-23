@@ -9,13 +9,22 @@ import SwiftUI
 
 struct LoginView: View {
     @ObservedObject var model: LoginOperation
+    @State private var shouldNavigate = false
+    @State private var isLoading = false
     
     var body: some View {
         NavigationStack {
             CustomPrompt(title: "Email/Username", promptValue: $model.email) {}
             CustomPassword(title: "Password", promptValue: $model.password)
             VStack() {
-                NavigationLink(destination: CandidatesView(model: CandidatesViewModel())) {
+                Button {
+                    isLoading = true
+                    Task {
+                        await model.login()
+                        shouldNavigate = true
+                        isLoading = false
+                    }
+                } label: {
                     Text("Sign in")
                         .frame(minWidth: 0, maxWidth: .infinity)
                         .padding()
@@ -23,13 +32,12 @@ struct LoginView: View {
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
-                .simultaneousGesture(TapGesture().onEnded {
-                    print("pressed")
-                    print("Task login starts")
-                    Task(priority: .high) {
-                        await model.login()
-                    }
-                })
+                .disabled(isLoading)
+                NavigationLink(isActive: $shouldNavigate) {
+                    CandidatesView()
+                } label: {
+                    EmptyView()
+                }
                 NavigationLink(destination: RegisterView()) {
                     Text("Register")
                         .frame(minWidth: 0, maxWidth: .infinity)
@@ -43,7 +51,3 @@ struct LoginView: View {
         }
     }
 }
-//
-//#Preview {
-//    LoginView(email: "", password: "")
-//}

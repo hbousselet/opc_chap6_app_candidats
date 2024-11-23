@@ -9,11 +9,12 @@ import SwiftUI
 
 struct CandidatesView: View {
     @State private var searchText: String = ""
-    @ObservedObject var model: CandidatesViewModel
+    //pourquoi stateObject et pas Observed object ici ??????
+    @StateObject var viewModel = CandidatesViewModel()
     
     var body: some View {
         NavigationStack {
-            List(model.candidats) { candidat in
+            List(viewModel.candidats) { candidat in
                 NavigationLink(candidat.lastName, value: candidat)
             }
             .navigationDestination(for: Candidate.self) { candidat in
@@ -21,10 +22,8 @@ struct CandidatesView: View {
             }
         }
         .onAppear {
-//            while ApiService.token?.isEmpty
-            Task(priority: .low) {
-                print("Task getcandidates starts")
-                await model.getCandidates()
+            Task {
+                await viewModel.getCandidates()
             }
         }
         .searchable(text: $searchText)

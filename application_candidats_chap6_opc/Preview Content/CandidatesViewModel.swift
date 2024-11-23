@@ -13,12 +13,12 @@ class CandidatesViewModel: ObservableObject {
     @MainActor
     func getCandidates() async {
         do {
-            let request = try await ApiService.shared.fetch(endpoint: .get(Route.getCandidatesList, ""), responseType: Candidates.self)
+            let request = try await ApiService.shared.fetch(endpoint: .get(Route.getCandidatesList, ""), responseType: [Candidate].self)
             switch request {
             case .success(let response):
                 guard let response else { return }
-                self.candidats = response.candidate
-                print("Successfully fetch the candidates")
+                self.candidats = response
+                print("Successfully fetch the candidates with first candidats : \(self.candidats[0])")
             case .failure(let error):
                 //TO DO - rajouter une alerte
                 print(error)
