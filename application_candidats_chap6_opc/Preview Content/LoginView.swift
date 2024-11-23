@@ -15,7 +15,7 @@ struct LoginView: View {
             CustomPrompt(title: "Email/Username", promptValue: $model.email) {}
             CustomPassword(title: "Password", promptValue: $model.password)
             VStack() {
-                NavigationLink(destination: SignInView()) {
+                NavigationLink(destination: CandidatesView(model: CandidatesViewModel())) {
                     Text("Sign in")
                         .frame(minWidth: 0, maxWidth: .infinity)
                         .padding()
@@ -25,7 +25,8 @@ struct LoginView: View {
                 }
                 .simultaneousGesture(TapGesture().onEnded {
                     print("pressed")
-                    Task {
+                    print("Task login starts")
+                    Task(priority: .high) {
                         await model.login()
                     }
                 })

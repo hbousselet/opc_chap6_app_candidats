@@ -27,7 +27,8 @@ class ApiService {
         
         var request = URLRequest(url: url)
         request.httpMethod = endpoint.httpMethod
-        request.setValue(ApiService.token, forHTTPHeaderField: "Authorization")
+        let token = ApiService.token ?? ""
+        request.setValue("Bearer " + token, forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = endpoint.method
         
@@ -135,11 +136,11 @@ struct Register: Decodable {
     let lastName: String
 }
 
-struct Candidates: Decodable {
+struct Candidates: Decodable {    
     let candidate: [Candidate]
 }
 
-struct Candidate: Decodable {
+struct Candidate: Decodable, Identifiable, Hashable {
     let phone: String?
     let note: String?
     let id: UUID
