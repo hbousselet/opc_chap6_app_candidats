@@ -54,7 +54,7 @@ class ApiService {
 
 enum Endpoint {
     case get(Route?, String?)
-    case put(Route?, String?)
+    case put(Route?, String?, [String: Any?]?)
     case delete(Route?, String?)
     case post(Route?, [String: Any])
     
@@ -62,8 +62,12 @@ enum Endpoint {
         switch self {
         case .get:
             return nil
-        case .put:
-            return nil
+        case .put(_, _, let parameters):
+            if let parameters {
+                return try? JSONSerialization.data(withJSONObject: parameters, options: [])
+            } else {
+                return nil
+            }
         case .delete:
             return nil
         case .post(_, let parameters):
@@ -86,9 +90,13 @@ enum Endpoint {
     
     var route: String {
         switch self {
-        case .put(let route, let id):
+        case .put(let route, let id,_):
             if let route, let id {
-                return route.rawValue + String("/\(id)")
+                if route == .updateFavorite {
+                    return "candidate/" + String("\(id)") + route.rawValue
+                } else {
+                    return route.rawValue + String("/\(id)")
+                }
             } else {
                 return ""
             }
@@ -119,6 +127,7 @@ enum Route: String {
     case register = "user/register/"
     case getCandidatesList = "candidate"
     case getCandidateById = "candidate/"
+    case updateFavorite = "/favorite"
 }
 
 enum APIErrors: Error {
@@ -144,13 +153,13 @@ struct Candidates: Decodable {
 }
 
 struct Candidate: Decodable, Identifiable, Hashable {
-    let phone: String?
-    let note: String?
+    var phone: String?
+    var note: String?
     let id: UUID
-    let firstName: String
-    let linkedinURL: String?
-    let isFavorite: Bool
-    let email: String
-    let lastName: String
+    var firstName: String
+    var linkedinURL: String?
+    var isFavorite: Bool
+    var email: String
+    var lastName: String
 }
 

@@ -9,6 +9,7 @@ import SwiftUI
 
 class CandidatesViewModel: ObservableObject {
     @Published var candidats: [Candidate] = []
+    var allCandidates: [Candidate] = []
     
     @MainActor
     func getCandidates() async {
@@ -18,6 +19,7 @@ class CandidatesViewModel: ObservableObject {
             case .success(let response):
                 guard let response else { return }
                 self.candidats = response
+                self.allCandidates = self.candidats
                 print("Successfully fetch the candidates with first candidats : \(self.candidats[0])")
             case .failure(let error):
                 //TO DO - rajouter une alerte
@@ -25,6 +27,15 @@ class CandidatesViewModel: ObservableObject {
             }
         } catch {
             print(error)
+        }
+    }
+    
+    func filterCandidates(with filter: String) {
+        switch filter {
+        case "favorite":
+            self.candidats = allCandidates.filter { $0.isFavorite == true }
+        default:
+            self.candidats = allCandidates.filter { $0.firstName.lowercased().contains(filter.lowercased()) || $0.lastName.lowercased().contains(filter.lowercased()) }
         }
     }
 }
