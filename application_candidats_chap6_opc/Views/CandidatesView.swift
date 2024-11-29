@@ -12,8 +12,8 @@ struct CandidatesView: View {
     @State private var isFavoriteFilter: Bool = false
     @State private var isEditable: Bool = false
     @State private var circleTapped: Bool = false
+    @State private var candidateToRemove: [Candidate] = []
     
-    //pourquoi stateObject et pas Observed object ici ??????
     @StateObject var viewModel = CandidatesViewModel()
     
     var body: some View {
@@ -22,13 +22,11 @@ struct CandidatesView: View {
                 HStack {
                     if isEditable {
                         Circle()
-                            .fill(.white)
-                            .stroke(.black, lineWidth: 4)
-                            .frame(width: 10, height: 10)
-                            .padding()
-                            .onChange(of: circleTapped) {
-                                print("tapped")
-                            }
+                            .fill(candidat.needToBeDeleted ? .black : .white)
+                            .stroke(.black, lineWidth: 1)
+                            .frame(width: 20, height: 20)
+                            .padding(.leading, 10)
+                        
                     }
                     NavigationLink("\(candidat.lastName) \(candidat.firstName)") {
                         ProfilView(of: candidat)
@@ -37,6 +35,12 @@ struct CandidatesView: View {
                     Spacer()
                     Image(systemName: "star")
                         .background(candidat.isFavorite ? Color.black : Color.clear)
+                }
+                .onTapGesture {
+                    viewModel.selectedCandidate(with: candidat)
+                    if !candidateToRemove.contains(candidat) {
+                        candidateToRemove.append(candidat)
+                    }
                 }
             }
             .searchable(text: $searchText)
@@ -75,15 +79,28 @@ struct CandidatesView: View {
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    isFavoriteFilter.toggle()
-                    viewModel.filterCandidates(with: "favorite")
-                    if isFavoriteFilter == false {
-                        viewModel.candidats = viewModel.allCandidates
+                if isEditable {
+                    Button {
+                        isEditable.toggle()
+                        // call the delete function
+                        Task {
+                            await viewModel.removeCandidates(with: candidateToRemove)
+                            candidateToRemove.removeAll()
+                        }
+                    } label: {
+                        Text("Delete")
                     }
-                    
-                } label: {
-                    Image(systemName: "star")
+                } else {
+                    Button {
+                        isFavoriteFilter.toggle()
+                        viewModel.filterCandidates(with: "favorite")
+                        if isFavoriteFilter == false {
+                            viewModel.candidats = viewModel.allCandidates
+                        }
+                        
+                    } label: {
+                        Image(systemName: "star")
+                    }
                 }
             }
         }

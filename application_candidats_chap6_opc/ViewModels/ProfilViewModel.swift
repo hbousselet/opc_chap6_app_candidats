@@ -11,16 +11,19 @@ class ProfilViewModel: ObservableObject {
     @Published var candidat: Candidate
     @Published var isAdmin: Bool
     var originalCandidateValue: Candidate
+    let session: URLSession
     
     init(candidatToShow: Candidate) {
         self.originalCandidateValue = candidatToShow
         self.candidat = candidatToShow
-        self.isAdmin = ApiService.isAdmin ?? false
+        self.isAdmin = UserDefaults.standard.bool(forKey: "isAdmin")
+        self.session = URLSession.shared
     }
     
     func updateFavorite(with candidateid: String) async {
+        let service = ApiService(session: session)
         do {
-            let request = try await ApiService.shared.fetch(endpoint: .put(Route.updateFavorite, candidateid, nil), responseType: Candidate.self)
+            let request = try await service.fetch(endpoint: .put(Route.updateFavorite, candidateid, nil), responseType: Candidate.self)
             switch request {
             case .success(let response):
                 print("Successfully update favorite: \(String(describing: response?.isFavorite))")
@@ -40,8 +43,10 @@ class ProfilViewModel: ObservableObject {
                           "firstName": self.candidat.firstName,
                           "lastName": self.candidat.lastName,
                           "phone": self.candidat.phone]
+        let service = ApiService(session: session)
+
         do {
-            let request = try await ApiService.shared.fetch(endpoint: .put(Route.getCandidateById, candidateid, parameters), responseType: Candidate.self)
+            let request = try await service.fetch(endpoint: .put(Route.getCandidateById, candidateid, parameters), responseType: Candidate.self)
             switch request {
             case .success(let response):
                 print("Successfully updated candidate: \(String(describing: response))")

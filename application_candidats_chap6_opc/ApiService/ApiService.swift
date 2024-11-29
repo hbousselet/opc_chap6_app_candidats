@@ -10,14 +10,11 @@ import Foundation
 
 class ApiService {
     let websiteURL = "http://127.0.0.1:8080/"
+    let session: URLSession
 
-    static var shared = ApiService()
-
-    static var token: String?
-    
-    static var isAdmin: Bool?
-    
-    private init() {}
+    init(session: URLSession = URLSession.shared) {
+        self.session = session
+    }
     
     func fetch<T: Decodable>(endpoint: Endpoint,
                              responseType: T.Type) async throws -> Result<T?, APIErrors> {
@@ -29,12 +26,17 @@ class ApiService {
         
         var request = URLRequest(url: url)
         request.httpMethod = endpoint.httpMethod
-        let token = ApiService.token ?? ""
+        
+        let userDefaults = UserDefaults.standard
+        
+        let savedToken = userDefaults.object(forKey: "token") as? String
+        let token = savedToken ?? ""
+        
         request.setValue("Bearer " + token, forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = endpoint.method
         
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await session.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse,
               [200, 201].contains(httpResponse.statusCode) else {
             return .failure(.invalidResponse)
@@ -56,7 +58,7 @@ enum Endpoint {
     case get(Route?, String?)
     case put(Route?, String?, [String: Any?]?)
     case delete(Route?, String?)
-    case post(Route?, [String: Any])
+    case post(Route?, [String: Any]?)
     
     var method: Data? {
         switch self {
@@ -71,56 +73,60 @@ enum Endpoint {
         case .delete:
             return nil
         case .post(_, let parameters):
-            return try? JSONSerialization.data(withJSONObject: parameters, options: [])
+            if let parameters {
+                return try? JSONSerialization.data(withJSONObject: parameters, options: [])
+            } else {
+                return nil
+            }
         }
     }
-    
-    var httpMethod: String {
-        switch self {
-        case .get:
-            return "GET"
-        case .put:
-            return "PUT"
-        case .delete:
-            return "DELETE"
-        default:
-            return "POST"
+        
+        var httpMethod: String {
+            switch self {
+            case .get:
+                return "GET"
+            case .put:
+                return "PUT"
+            case .delete:
+                return "DELETE"
+            default:
+                return "POST"
+            }
         }
-    }
-    
-    var route: String {
-        switch self {
-        case .put(let route, let id,_):
-            if let route, let id {
-                if route == .updateFavorite {
-                    return "candidate/" + String("\(id)") + route.rawValue
+        
+        var route: String {
+            switch self {
+            case .put(let route, let id,_):
+                if let route, let id {
+                    if route == .updateFavorite {
+                        return "candidate/" + String("\(id)") + route.rawValue
+                    } else {
+                        return route.rawValue + String("/\(id)")
+                    }
                 } else {
-                    return route.rawValue + String("/\(id)")
+                    return ""
                 }
-            } else {
-                return ""
-            }
-        case .get(let route, let id):
-            if let route, let id {
-                return route.rawValue + String("/\(id)")
-            } else {
-                return ""
-            }
-        case .delete(let route, let id):
-            if let route, let id {
-                return route.rawValue + String("/\(id)")
-            } else {
-                return ""
-            }
-        case .post(let route,_):
-            if let route {
-                return route.rawValue
-            } else {
-                return ""
+            case .get(let route, let id):
+                if let route, let id {
+                    return route.rawValue + String("/\(id)")
+                } else {
+                    return ""
+                }
+            case .delete(let route, let id):
+                if let route, let id {
+                    return route.rawValue + String("/\(id)")
+                } else {
+                    return ""
+                }
+            case .post(let route,_):
+                if let route {
+                    return route.rawValue
+                } else {
+                    return ""
+                }
             }
         }
     }
-}
 
 enum Route: String {
     case auth = "user/auth/"
@@ -134,32 +140,5 @@ enum APIErrors: Error {
     case invalidResponse
     case invalidDecode
     case invalidURL
+    case noError
 }
-
-struct Login: Decodable {
-    let token: String
-    let isAdmin: Bool
-}
-
-struct Register: Decodable {
-    let email: String
-    let password: String
-    let firstName: String
-    let lastName: String
-}
-
-struct Candidates: Decodable {    
-    let candidate: [Candidate]
-}
-
-struct Candidate: Decodable, Identifiable, Hashable {
-    var phone: String?
-    var note: String?
-    let id: UUID
-    var firstName: String
-    var linkedinURL: String?
-    var isFavorite: Bool
-    var email: String
-    var lastName: String
-}
-

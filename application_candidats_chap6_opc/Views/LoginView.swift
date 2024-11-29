@@ -20,8 +20,12 @@ struct LoginView: View {
                 Button {
                     isLoading = true
                     Task {
-                        await model.login()
-                        shouldNavigate = true
+                        try await model.login()
+                        if model.needToPresentAlert {
+                            shouldNavigate = false
+                        } else {
+                            shouldNavigate = true
+                        }
                         isLoading = false
                     }
                 } label: {
@@ -34,6 +38,12 @@ struct LoginView: View {
                 }
                 .disabled(isLoading)
                 .padding()
+                .alert(isPresented: $model.needToPresentAlert) {
+                            Alert(
+                                title: Text("Not able to connect the user"),
+                                message: Text("You received the error: \(model.alert.debugDescription)"),
+                                dismissButton: .destructive(Text("Exit")))
+                        }
                 NavigationLink(isActive: $shouldNavigate) {
                     CandidatesView()
                 } label: {

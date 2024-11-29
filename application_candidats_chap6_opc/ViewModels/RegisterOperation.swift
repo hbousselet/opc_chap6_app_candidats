@@ -12,7 +12,11 @@ class RegisterOperation: ObservableObject {
     @Published var password: String = ""
     @Published var firstName: String = ""
     @Published var lastName: String = ""
+    let session: URLSession
     
+    init() {
+        self.session = URLSession.shared
+    }
     
     @MainActor
     func register() async {
@@ -21,8 +25,9 @@ class RegisterOperation: ObservableObject {
                           "firstName": self.firstName,
                           "email": self.email]
         
+        let service = ApiService(session: session)
         do {
-            let request = try await ApiService.shared.fetch(endpoint: .post(Route.register, parameters), responseType: Register.self)
+            let request = try await service.fetch(endpoint: .post(Route.register, parameters), responseType: Register.self)
             switch request {
             case .success(let success):
                 print("Successfully registered")
@@ -33,4 +38,11 @@ class RegisterOperation: ObservableObject {
             print(error)
         }
     }
+}
+
+struct Register: Decodable {
+    let email: String
+    let password: String
+    let firstName: String
+    let lastName: String
 }
