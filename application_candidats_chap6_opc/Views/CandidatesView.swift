@@ -12,7 +12,6 @@ struct CandidatesView: View {
     @State private var isFavoriteFilter: Bool = false
     @State private var isEditable: Bool = false
     @State private var circleTapped: Bool = false
-    @State private var candidateToRemove: [Candidate] = []
     
     @StateObject var viewModel = CandidatesViewModel()
     
@@ -26,25 +25,29 @@ struct CandidatesView: View {
                             .stroke(.black, lineWidth: 1)
                             .frame(width: 20, height: 20)
                             .padding(.leading, 10)
-                        
+                            .onTapGesture {
+                                viewModel.selectedCandidate(with: candidat)
+                            }
                     }
                     NavigationLink("\(candidat.lastName) \(candidat.firstName)") {
                         ProfilView(of: candidat)
                     }
+                    .buttonStyle(PlainButtonStyle())
+                    //ou ici
                     .disabled(isEditable)
                     Spacer()
-                    Image(systemName: "star")
-                        .background(candidat.isFavorite ? Color.black : Color.clear)
-                }
-                .onTapGesture {
-                    viewModel.selectedCandidate(with: candidat)
-                    if !candidateToRemove.contains(candidat) {
-                        candidateToRemove.append(candidat)
+                    if candidat.isFavorite {
+                        Image(systemName: "star.fill")
+                            .foregroundStyle(.black)
+                    } else {
+                        Image(systemName: "star")
+                            .foregroundStyle(.black)
                     }
                 }
             }
             .searchable(text: $searchText)
             .listRowSpacing(2)
+            .listStyle(PlainListStyle())
             .onChange(of: searchText) {
                 viewModel.filterCandidates(with: searchText)
                 if searchText == "" {
@@ -84,12 +87,17 @@ struct CandidatesView: View {
                         isEditable.toggle()
                         // call the delete function
                         Task {
-                            await viewModel.removeCandidates(with: candidateToRemove)
-                            candidateToRemove.removeAll()
+                            await viewModel.removeCandidates()
                         }
                     } label: {
                         Text("Delete")
                     }
+                    .alert(isPresented: $viewModel.needToPresentAlert) {
+                        Alert(
+                            title: Text("Alert !"),
+                            message: Text("\(String(describing: viewModel.alert?.description ?? "chc"))"),
+                            dismissButton: .destructive(Text("Exit")))
+                            }
                 } else {
                     Button {
                         isFavoriteFilter.toggle()

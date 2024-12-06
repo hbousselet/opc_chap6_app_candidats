@@ -45,18 +45,30 @@ struct ActionButton: View {
 struct CustomPrompt: View {
     var title: String
     @Binding var promptValue: String
+    @State var showAlert = false
     let action: () -> Void
     
     var body: some View {
         VStack(alignment: .leading) {
             Text(title)
+                .font(.system(size: 16, weight: .bold))
             TextField("", text: $promptValue)
                 .padding()
-                .background(Color(UIColor.secondarySystemBackground))
-                .cornerRadius(8)
+                .border(.black, width: 2)
                 .autocorrectionDisabled(true)
                 .textInputAutocapitalization(.never)
                 .keyboardType(.emailAddress)
+                .onSubmit {
+                    if promptValue.isEmpty {
+                        showAlert.toggle()
+                    }
+                }
+                .alert(isPresented: $showAlert) {
+                    Alert(
+                        title: Text("Alert !"),
+                        message: Text("\(CustomErrors.emptyPrompt.description)"),
+                        dismissButton: .destructive(Text("Exit")))
+                        }
         }
         .padding(.horizontal, 20)
     }
@@ -64,15 +76,20 @@ struct CustomPrompt: View {
 
 struct CustomPassword: View {
     var title: String
+    var addForgotPasswordIndication: Bool
     @Binding var promptValue: String
     
     var body: some View {
         VStack(alignment: .leading) {
             Text(title)
+                .font(.system(size: 16, weight: .bold))
             SecureField("", text: $promptValue)
                 .padding()
-                .background(Color(UIColor.secondarySystemBackground))
-                .cornerRadius(8)
+                .border(.black, width: 2)
+            if addForgotPasswordIndication {
+                Text("Forgot password ?")
+                    .font(.system(.caption2, design: .default, weight: .light))
+            }
         }
         .padding(.horizontal, 20)
     }

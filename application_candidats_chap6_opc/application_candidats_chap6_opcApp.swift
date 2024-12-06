@@ -10,7 +10,6 @@ import SwiftUI
 @main
 struct application_candidats_chap6_opcApp: App {
     @StateObject var register = RegisterOperation()
-
     
     var body: some Scene {
         WindowGroup {

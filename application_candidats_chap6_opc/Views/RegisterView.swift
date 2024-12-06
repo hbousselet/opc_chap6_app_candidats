@@ -19,33 +19,48 @@ struct RegisterView: View {
     @State var confirmedPassword: String = ""
     
     var body: some View {
-        NavigationStack {
-            CustomPrompt(title: "First Name", promptValue: $model.firstName) {}
-            CustomPrompt(title: "Last Name", promptValue: $model.lastName) {}
-            CustomPrompt(title: "Email", promptValue: $model.email) {}
-            CustomPassword(title: "Password", promptValue: $model.password)
-            CustomPassword(title: "Confirm Password", promptValue: $confirmedPassword)
-            Button {
-                //check if creation is ok dans viewModel, si ok => dismiss
-                Task {
-                    await model.register()
+        GeometryReader { geo in
+            NavigationStack {
+                Text("Register")
+                    .font(.system(.largeTitle, design: .default, weight: .medium))
+                    .padding(.top, 20)
+                CustomPrompt(title: "First Name", promptValue: $model.firstName) {}
+                    .padding(.top, 20)
+                CustomPrompt(title: "Last Name", promptValue: $model.lastName) {}
+                    .padding(.top, 20)
+                CustomPrompt(title: "Email", promptValue: $model.email) {}
+                    .padding(.top, 20)
+                CustomPassword(title: "Password", addForgotPasswordIndication: false , promptValue: $model.password)
+                    .padding(.top, 20)
+                CustomPassword(title: "Confirm Password", addForgotPasswordIndication: false, promptValue: $model.confirmedPassword)
+                    .padding(.top, 20)
+                Button {
+                    Task {
+                        await model.register()
+                    }
+                } label: {
+                    Text("Create")
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundStyle(.black)
+                        .frame(width: geo.size.width/4)
+                        .padding()
+                        .border(.black, width: 2)
                 }
-                dismiss()
-            } label: {
-                Text("Create")
-                    .frame(minWidth: 0, maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+                .padding(.horizontal)
+                .padding(.top, 20)
+                .navigationBarBackButtonHidden(true)
+                .alert(isPresented: $model.needToPresentAlert) {
+                    Alert(
+                        title: Text("Alert !"),
+                        message: Text("\(String(describing: model.alert?.description ?? "error"))"),
+                        dismissButton: .destructive(Text("Exit"), action: {
+                            if model.alert == .registerSuccess {
+                                dismiss()
+                            }
+                        }))
+                }
             }
-            .padding(.horizontal)
-            .navigationTitle("Register")
+            .padding(.horizontal, 40)
         }
     }
 }
-
-
-//#Preview {
-//    RegisterView(firstName: "Bla", lastName: "te", email: "hd", password: "nd", confirmedPassword: "df")
-//}

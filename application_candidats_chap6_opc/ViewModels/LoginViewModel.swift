@@ -10,7 +10,7 @@ import SwiftUI
 class LoginOperation: ObservableObject {
     @Published var email: String = ""
     @Published var password: String = ""
-    @Published var alert: APIErrors?
+    @Published var alert: CustomErrors?
     @Published var needToPresentAlert = false
     
     let session: URLSession
@@ -21,16 +21,21 @@ class LoginOperation: ObservableObject {
     
     @MainActor
   func login() async throws {
-      let service = ApiService(session: session)
+      let service = ApiServiceV2(session: session)
       let parameters = ["email": self.email, "password": self.password]
+      if !isRecipientWellFormattedForEmail(email) {
+          self.needToPresentAlert.toggle()
+          self.alert = .invalidEmail
+          return
+      }
       do {
-          let request = try await service.fetch(endpoint: .post(Route.auth, parameters), responseType: Login.self)
+          let request = try await service.fetch(endpoint: .auth, parametersBody: parameters, responseType: Login.self)
           switch request {
           case .success(let response):
               let userDefaults = UserDefaults.standard
               userDefaults.set(response?.token, forKey: "token")
               userDefaults.set(response?.isAdmin, forKey: "isAdmin")
-              print("Successfully login with email: \(email)")
+            print("Successfully login with email: \(email) with token : \(String(describing: response?.token))")
           case .failure(let error):
               //TO DO - rajouter une alerte
               print(error)

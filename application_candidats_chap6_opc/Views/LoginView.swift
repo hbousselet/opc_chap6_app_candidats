@@ -13,52 +13,57 @@ struct LoginView: View {
     @State private var isLoading = false
     
     var body: some View {
-        NavigationStack {
-            CustomPrompt(title: "Email/Username", promptValue: $model.email) {}
-            CustomPassword(title: "Password", promptValue: $model.password)
-            VStack() {
-                Button {
-                    isLoading = true
-                    Task {
-                        try await model.login()
-                        if model.needToPresentAlert {
-                            shouldNavigate = false
-                        } else {
-                            shouldNavigate = true
+        GeometryReader { geo in
+            NavigationStack {
+                Text("Login")
+                    .font(.system(.largeTitle, design: .default, weight: .medium))
+                VStack() {
+                    CustomPrompt(title: "Email/Username", promptValue: $model.email) {}
+                    CustomPassword(title: "Password", addForgotPasswordIndication: true, promptValue: $model.password)
+                    Button {
+                        isLoading = true
+                        Task {
+                            try await model.login()
+                            if model.needToPresentAlert {
+                                shouldNavigate = false
+                            } else {
+                                shouldNavigate = true
+                            }
+                            isLoading = false
                         }
-                        isLoading = false
+                    } label: {
+                        Text("Sign in")
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundStyle(.black)
+                            .frame(width: geo.size.width/4)
+                            .padding()
+                            .border(.black, width: 2)
                     }
-                } label: {
-                    Text("Sign in")
-                        .frame(minWidth: 0, maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+                    .disabled(isLoading)
+                    .padding()
+                    .padding(.horizontal)
+                    .alert(isPresented: $model.needToPresentAlert) {
+                        Alert(
+                            title: Text("Alert !"),
+                            message: Text("\(String(describing: model.alert?.description ?? "chc"))"),
+                            dismissButton: .destructive(Text("Exit")))
+                    }
+                    NavigationLink(isActive: $shouldNavigate) {
+                        CandidatesView()
+                    } label: {
+                        EmptyView()
+                    }
+                    NavigationLink(destination: RegisterView()) {
+                        Text("Register")
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundStyle(.black)
+                            .frame(width: geo.size.width/4)
+                            .padding()
+                            .border(.black, width: 2)
+                    }
                 }
-                .disabled(isLoading)
-                .padding()
-                .alert(isPresented: $model.needToPresentAlert) {
-                            Alert(
-                                title: Text("Not able to connect the user"),
-                                message: Text("You received the error: \(model.alert.debugDescription)"),
-                                dismissButton: .destructive(Text("Exit")))
-                        }
-                NavigationLink(isActive: $shouldNavigate) {
-                    CandidatesView()
-                } label: {
-                    EmptyView()
-                }
-                NavigationLink(destination: RegisterView()) {
-                    Text("Register")
-                        .frame(minWidth: 0, maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                }
+                .padding(.top)
             }
-            .padding(.horizontal)
         }
     }
 }

@@ -8,24 +8,30 @@
 import SwiftUI
 
 class ProfilViewModel: ObservableObject {
-    @Published var candidat: Candidate
+    @Published var candidate: Candidate
     @Published var isAdmin: Bool
+    @Published var alert: CustomErrors?
+    @Published var needToPresentAlert = false
+    
     var originalCandidateValue: Candidate
     let session: URLSession
     
     init(candidatToShow: Candidate) {
         self.originalCandidateValue = candidatToShow
-        self.candidat = candidatToShow
+        self.candidate = candidatToShow
         self.isAdmin = UserDefaults.standard.bool(forKey: "isAdmin")
         self.session = URLSession.shared
     }
     
-    func updateFavorite(with candidateid: String) async {
-        let service = ApiService(session: session)
+    @MainActor
+    func updateFavorite(with candidate: Candidate) async {
+        let service = ApiServiceV2(session: session)
         do {
-            let request = try await service.fetch(endpoint: .put(Route.updateFavorite, candidateid, nil), responseType: Candidate.self)
+            let request = try await service.fetch(endpoint: .updateFavorite(candidate: candidate.id.uuidString), responseType: Candidate.self)
             switch request {
             case .success(let response):
+                self.needToPresentAlert = true
+                self.alert = .favoriteCandidateSuccess(name: candidate.firstName + candidate.lastName)
                 print("Successfully update favorite: \(String(describing: response?.isFavorite))")
             case .failure(let error):
                 //TO DO - rajouter une alerte
@@ -36,23 +42,26 @@ class ProfilViewModel: ObservableObject {
         }
     }
     
-    func updateCandidateInformations(with candidateid: String) async {
-        let parameters = ["email": self.candidat.email,
-                          "note": self.candidat.note,
-                          "linkedinURL": self.candidat.linkedinURL,
-                          "firstName": self.candidat.firstName,
-                          "lastName": self.candidat.lastName,
-                          "phone": self.candidat.phone]
-        let service = ApiService(session: session)
+    @MainActor
+    func updateCandidateInformations(with candidate: Candidate) async {
+        let parameters = ["email": self.candidate.email,
+                          "note": self.candidate.note,
+                          "linkedinURL": self.candidate.linkedinURL,
+                          "firstName": self.candidate.firstName,
+                          "lastName": self.candidate.lastName,
+                          "phone": self.candidate.phone]
+        let service = ApiServiceV2(session: session)
 
         do {
-            let request = try await service.fetch(endpoint: .put(Route.getCandidateById, candidateid, parameters), responseType: Candidate.self)
+            let request = try await service.fetch(endpoint: .updateCandidate(candidate: candidate.id.uuidString), parametersBody: parameters as [String : Any], responseType: Candidate.self)
             switch request {
             case .success(let response):
+                self.needToPresentAlert = true
+                self.alert = .updateCandidateSuccess
                 print("Successfully updated candidate: \(String(describing: response))")
             case .failure(let error):
                 //TO DO - rajouter une alerte
-                self.candidat = self.originalCandidateValue
+                self.candidate = self.originalCandidateValue
                 print(error)
             }
         } catch {
@@ -60,10 +69,3 @@ class ProfilViewModel: ObservableObject {
         }
     }
 }
-
-//email: String (email)
-//note: String?
-//linkedinURL: String?
-//firstName: String
-//lastName: String
-//phone: String

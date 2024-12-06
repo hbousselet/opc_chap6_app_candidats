@@ -9,6 +9,9 @@ import SwiftUI
 
 class CandidatesViewModel: ObservableObject {
     @Published var candidats: [Candidate] = []
+    @Published var alert: CustomErrors?
+    @Published var needToPresentAlert = false
+    
     var allCandidates: [Candidate] = []
     let session: URLSession
     
@@ -18,9 +21,9 @@ class CandidatesViewModel: ObservableObject {
     
     @MainActor
     func getCandidates() async {
-        let service = ApiService(session: session)
+        let service = ApiServiceV2(session: session)
         do {
-            let request = try await service.fetch(endpoint: .get(Route.getCandidatesList, ""), responseType: [Candidate].self)
+            let request = try await service.fetch(endpoint: .fetchCandidates, responseType: [Candidate].self)
             switch request {
             case .success(let response):
                 guard let response else { return }
@@ -46,15 +49,19 @@ class CandidatesViewModel: ObservableObject {
     }
     
     @MainActor
-    func removeCandidates(with candidatesToRemove: [Candidate]) async {
-        print("Need to remove those candidates: \(candidatesToRemove)")
-        let service = ApiService(session: session)
+    func removeCandidates() async {
+        //get candidatesId with needToBeDeleted == true
+        let candidatesIdToRemove = self.candidats.filter { $0.needToBeDeleted == true }
+        
+        let service = ApiServiceV2(session: session)
 
-        for candidateToRemove in candidatesToRemove {
+        for candidateToRemove in candidatesIdToRemove {
             do {
-                let request = try await service.fetch(endpoint: .delete(Route.getCandidateById, candidateToRemove.id.uuidString), responseType: EmptyResponse.self)
+                let request = try await service.fetch(endpoint: .deleteCandidate(candidate: candidateToRemove.id.uuidString), responseType: EmptyResponse.self)
                 switch request {
                 case .success(_):
+                    self.needToPresentAlert = true
+                    self.alert = .deleteCandidateSuccess(name: candidateToRemove.firstName + candidateToRemove.lastName)
                     print("Successfully deleted candidate : \(candidateToRemove)")
                 case .failure(let error):
                     //TO DO - rajouter une alerte
@@ -69,12 +76,6 @@ class CandidatesViewModel: ObservableObject {
     
     func selectedCandidate(with candidateSelected: Candidate) {
         self.candidats[self.candidats.firstIndex { candid in candid.id == candidateSelected.id }!].needToBeDeleted.toggle()
-    }
-    
-    private func initializeDeleteList() {
-        for cand in self.candidats {
-            self.candidats[self.candidats.firstIndex { candid in candid.id == cand.id }!].needToBeDeleted = false
-        }
     }
 }
 

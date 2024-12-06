@@ -19,38 +19,41 @@ struct ProfilView: View {
     var body: some View {
         NavigationStack {
             HStack {
-//                Text("\(model.candidat.firstName)")
-                TextField("\(model.originalCandidateValue.firstName)", text: $model.candidat.firstName)
+                TextField("\(model.originalCandidateValue.firstName)", text: $model.candidate.firstName)
                     .textFieldStyle(.plain)
                     .border(.black, width: isEditable ? 3 : 0)
                     .disabled(!isEditable)
                 Spacer()
                 Button {
                     if model.isAdmin {
-                        print("tapped")
                         Task {
-                            await model.updateFavorite(with: model.candidat.id.uuidString)
+                            await model.updateFavorite(with: model.candidate)
                         }
                     }
                 } label: {
-                    Image(systemName: "star")
-                        .foregroundStyle(model.candidat.isFavorite ? Color.clear : Color.black)
+                    Image(systemName: "star.fill").foregroundStyle(.black)
                 }
+                .alert(isPresented: $model.needToPresentAlert) {
+                    Alert(
+                        title: Text("Alert !"),
+                        message: Text("\(String(describing: model.alert?.description ?? "chc"))"),
+                        dismissButton: .destructive(Text("Exit")))
+                        }
             }
             VStack(alignment: .leading) {
-                Text(!isEditable ? "Phone \(model.candidat.phone ?? "")" : "Phone")
+                Text(!isEditable ? "Phone \(model.candidate.phone ?? "")" : "Phone")
                 if isEditable {
                     TextField("\(model.originalCandidateValue.phone ?? "")", text: Binding(
-                        get: { self.model.candidat.phone ?? "" },
-                        set: { self.model.candidat.phone = $0 }
+                        get: { self.model.candidate.phone ?? "" },
+                        set: { self.model.candidate.phone = $0 }
                     ))
                         .textFieldStyle(.plain)
                         .border(.black, width: isEditable ? 3 : 0)
                         .disabled(!isEditable)
                 }
-                Text(!isEditable ? "Email  \(model.candidat.email)" : "Email")
+                Text(!isEditable ? "Email  \(model.candidate.email)" : "Email")
                 if isEditable {
-                    TextField("\(model.originalCandidateValue.email)", text: $model.candidat.email)
+                    TextField("\(model.originalCandidateValue.email)", text: $model.candidate.email)
                         .textFieldStyle(.plain)
                         .border(.black, width: isEditable ? 3 : 0)
                         .disabled(!isEditable)
@@ -58,8 +61,8 @@ struct ProfilView: View {
                 if isEditable {
                     Text("Linkedin")
                     TextField("\(model.originalCandidateValue.linkedinURL ?? "")", text: Binding(
-                        get: { self.model.candidat.linkedinURL ?? "" },
-                        set: { self.model.candidat.linkedinURL = $0 }
+                        get: { self.model.candidate.linkedinURL ?? "" },
+                        set: { self.model.candidate.linkedinURL = $0 }
                     ))
                         .textFieldStyle(.plain)
                         .border(.black, width: isEditable ? 3 : 0)
@@ -82,8 +85,8 @@ struct ProfilView: View {
                         .opacity(0.2)
                         .overlay {
                             TextField("\(model.originalCandidateValue.note ?? "")", text: Binding(
-                                get: { self.model.candidat.note ?? "" },
-                                set: { self.model.candidat.note = $0 }
+                                get: { self.model.candidate.note ?? "" },
+                                set: { self.model.candidate.note = $0 }
                             ))
                                 .textFieldStyle(.plain)
                                 .disabled(!isEditable)
@@ -108,7 +111,7 @@ struct ProfilView: View {
                 } else {
                     Button {
                         isEditable.toggle()
-                        model.candidat = model.originalCandidateValue
+                        model.candidate = model.originalCandidateValue
                     } label: {
                         Text("Cancel")
                     }
@@ -126,11 +129,17 @@ struct ProfilView: View {
                         isEditable.toggle()
                         //do the call to update the Candidate
                         Task {
-                            await model.updateCandidateInformations(with: model.candidat.id.uuidString)
+                            await model.updateCandidateInformations(with: model.candidate)
                         }
                     } label: {
                         Text("Done")
                     }
+                    .alert(isPresented: $model.needToPresentAlert) {
+                        Alert(
+                            title: Text("Alert !"),
+                            message: Text("\(String(describing: model.alert?.description ?? "chc"))"),
+                            dismissButton: .destructive(Text("Exit")))
+                            }
                 }
             }
         }
