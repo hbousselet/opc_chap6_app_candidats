@@ -46,7 +46,7 @@ struct CustomPrompt: View {
     var title: String
     @Binding var promptValue: String
     @State var showAlert = false
-    let action: () -> Void
+    let action: (() -> Void)? = nil
     
     var body: some View {
         VStack(alignment: .leading) {

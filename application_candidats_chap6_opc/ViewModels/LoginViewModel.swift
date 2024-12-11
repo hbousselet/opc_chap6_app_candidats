@@ -22,14 +22,13 @@ class LoginOperation: ObservableObject {
     @MainActor
   func login() async throws {
       let service = ApiServiceV2(session: session)
-      let parameters = ["email": self.email, "password": self.password]
       if !isRecipientWellFormattedForEmail(email) {
           self.needToPresentAlert.toggle()
           self.alert = .invalidEmail
           return
       }
       do {
-          let request = try await service.fetch(endpoint: .auth, parametersBody: parameters, responseType: Login.self)
+        let request = try await service.fetch(endpoint: .auth(email: self.email, password: self.password), responseType: Login.self)
           switch request {
           case .success(let response):
               let userDefaults = UserDefaults.standard

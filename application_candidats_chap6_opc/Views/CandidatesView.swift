@@ -24,17 +24,22 @@ struct CandidatesView: View {
                             .fill(candidat.needToBeDeleted ? .black : .white)
                             .stroke(.black, lineWidth: 1)
                             .frame(width: 20, height: 20)
-                            .padding(.leading, 10)
+                            .padding(.leading, 0)
                             .onTapGesture {
                                 viewModel.selectedCandidate(with: candidat)
                             }
                     }
-                    NavigationLink("\(candidat.lastName) \(candidat.firstName)") {
-                        ProfilView(of: candidat)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    //ou ici
-                    .disabled(isEditable)
+                    let lastname = candidat.lastName.first?.uppercased() ?? ""
+                    Text("\(candidat.firstName) \(lastname).")
+                        .overlay(
+                            NavigationLink {
+                                ProfilView(of: candidat)
+                            } label: {
+                                EmptyView()
+                                    .frame(width: 0, height: 0)
+                            }.opacity(0)
+                        )
+                        .disabled(isEditable)
                     Spacer()
                     if candidat.isFavorite {
                         Image(systemName: "star.fill")
@@ -44,10 +49,12 @@ struct CandidatesView: View {
                             .foregroundStyle(.black)
                     }
                 }
+                .padding(.horizontal, 2)
             }
+            .listRowSeparator(.hidden)
+            .listRowSpacing(8.0)
+//            .listStyle(.plain)
             .searchable(text: $searchText)
-            .listRowSpacing(2)
-            .listStyle(PlainListStyle())
             .onChange(of: searchText) {
                 viewModel.filterCandidates(with: searchText)
                 if searchText == "" {
@@ -60,6 +67,11 @@ struct CandidatesView: View {
                 await viewModel.getCandidates()
             }
         }
+        .refreshable {
+            Task {
+                await viewModel.getCandidates()
+            }
+        }
         .navigationTitle("Candidats")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
@@ -67,14 +79,12 @@ struct CandidatesView: View {
             ToolbarItem(placement: .topBarLeading) {
                 if isEditable {
                     Button {
-                        //action for edit
                         isEditable.toggle()
                     } label: {
                         Text("Cancel")
                     }
                 } else {
                     Button {
-                        //action for edit
                         isEditable.toggle()
                     } label: {
                         Text("Edit")

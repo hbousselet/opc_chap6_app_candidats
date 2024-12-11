@@ -199,8 +199,8 @@ enum CustomErrors: Error, Equatable {
 }
 
 enum RouteV2 {
-    case auth
-    case userRegister
+    case auth(email: String, password: String)
+    case userRegister(email: String, password: String, firstName: String, lastName: String)
     case fetchCandidate(candidate: String)
     case fetchCandidates
     case createCandidate
@@ -228,6 +228,17 @@ enum RouteV2 {
             return .post
         }
     }
+  
+  var parameters: [String: Any]? {
+      switch self {
+      case .auth(let email, let password):
+          return ["mail": email, "password": password]
+      case .userRegister(let email, let password, let firstName, let lastName):
+          return ["mail": email, "password": password, "firstName": firstName, "lastName": lastName]
+      default:
+          return nil
+      }
+  }
     
     var path: String {
         switch self {
@@ -267,7 +278,6 @@ class ApiServiceV2 {
     }
     
     func fetch<T: Decodable>(endpoint: RouteV2,
-                             parametersBody: [String: Any]? = nil,
                              responseType: T.Type) async throws -> Result<T?, CustomErrors> {
         
         guard let url = URL(string: websiteURL + endpoint.path) else {
@@ -280,12 +290,13 @@ class ApiServiceV2 {
         
         let userDefaults = UserDefaults.standard
         
-        let savedToken = userDefaults.object(forKey: "token") as? String
-        let token = savedToken ?? ""
+        if let savedToken = userDefaults.object(forKey: "token") as? String {
+            request.setValue("Bearer " + savedToken, forHTTPHeaderField: "Authorization")
+        }
         
-        request.setValue("Bearer " + token, forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        if let parametersBody {
+        
+        if let parametersBody = endpoint.parameters {
             request.httpBody = try? JSONSerialization.data(withJSONObject: parametersBody, options: [])
         }
         let (data, response) = try await session.data(for: request)

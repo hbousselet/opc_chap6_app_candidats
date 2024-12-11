@@ -40,7 +40,7 @@ class RegisterOperation: ObservableObject {
         
         let service = ApiServiceV2(session: session)
         do {
-            let request = try await service.fetch(endpoint: .userRegister, parametersBody: parameters, responseType: Register.self)
+            let request = try await service.fetch(endpoint: .userRegister(email: self.email, password: self.password, firstName: self.lastName, lastName: self.firstName), responseType: Register.self)
             switch request {
             case .success(_):
                 self.needToPresentAlert.toggle()

@@ -18,82 +18,98 @@ struct ProfilView: View {
     
     var body: some View {
         NavigationStack {
-            HStack {
-                TextField("\(model.originalCandidateValue.firstName)", text: $model.candidate.firstName)
-                    .textFieldStyle(.plain)
-                    .border(.black, width: isEditable ? 3 : 0)
-                    .disabled(!isEditable)
-                Spacer()
-                Button {
-                    if model.isAdmin {
-                        Task {
-                            await model.updateFavorite(with: model.candidate)
+            ScrollView {
+                HStack {
+                    let lastnameCandidateArranged = model.originalCandidateValue.lastName.first?.uppercased() ?? ""
+                    Text("\(model.originalCandidateValue.firstName) \(lastnameCandidateArranged).")
+                        .font(.system(size: 25, weight: .bold))
+                        .padding(.top)
+                    Spacer()
+                    Button {
+                        if model.isAdmin {
+                            Task {
+                                await model.updateFavorite(with: model.candidate)
+                            }
                         }
+                    } label: {
+                        Image(systemName: "star.fill").foregroundStyle(.black)
                     }
-                } label: {
-                    Image(systemName: "star.fill").foregroundStyle(.black)
-                }
-                .alert(isPresented: $model.needToPresentAlert) {
-                    Alert(
-                        title: Text("Alert !"),
-                        message: Text("\(String(describing: model.alert?.description ?? "chc"))"),
-                        dismissButton: .destructive(Text("Exit")))
-                        }
-            }
-            VStack(alignment: .leading) {
-                Text(!isEditable ? "Phone \(model.candidate.phone ?? "")" : "Phone")
-                if isEditable {
-                    TextField("\(model.originalCandidateValue.phone ?? "")", text: Binding(
-                        get: { self.model.candidate.phone ?? "" },
-                        set: { self.model.candidate.phone = $0 }
-                    ))
-                        .textFieldStyle(.plain)
-                        .border(.black, width: isEditable ? 3 : 0)
-                        .disabled(!isEditable)
-                }
-                Text(!isEditable ? "Email  \(model.candidate.email)" : "Email")
-                if isEditable {
-                    TextField("\(model.originalCandidateValue.email)", text: $model.candidate.email)
-                        .textFieldStyle(.plain)
-                        .border(.black, width: isEditable ? 3 : 0)
-                        .disabled(!isEditable)
-                }
-                if isEditable {
-                    Text("Linkedin")
-                    TextField("\(model.originalCandidateValue.linkedinURL ?? "")", text: Binding(
-                        get: { self.model.candidate.linkedinURL ?? "" },
-                        set: { self.model.candidate.linkedinURL = $0 }
-                    ))
-                        .textFieldStyle(.plain)
-                        .border(.black, width: isEditable ? 3 : 0)
-                        .disabled(!isEditable)
-                } else {
-                    HStack {
-                        Text("Linkedin")
-                        Spacer()
-                        Button {
-                            
-                        } label: {
-                            Text("Go on Linkedin")
-                        }
-                        
+                    .alert(isPresented: $model.needToPresentAlert) {
+                        Alert(
+                            title: Text("Alert !"),
+                            message: Text("\(String(describing: model.alert?.description ?? "chc"))"),
+                            dismissButton: .destructive(Text("Exit")))
                     }
                 }
+                .padding(.top)
                 VStack(alignment: .leading) {
-                    Text("Note")
-                    RoundedRectangle(cornerRadius: 12)
-                        .opacity(0.2)
-                        .overlay {
-                            TextField("\(model.originalCandidateValue.note ?? "")", text: Binding(
-                                get: { self.model.candidate.note ?? "" },
-                                set: { self.model.candidate.note = $0 }
-                            ))
-                                .textFieldStyle(.plain)
-                                .disabled(!isEditable)
+                    Text(!isEditable ? "Phone \(model.candidate.phone ?? "")" : "Phone")
+                        .font(.system(size: 22, weight: .bold))
+                    if isEditable {
+                        TextField("\(model.originalCandidateValue.phone ?? "")", text: Binding(
+                            get: { self.model.candidate.phone ?? "" },
+                            set: { self.model.candidate.phone = $0 }
+                        ))
+                        .textFieldStyle(.plain)
+                        .border(.black, width: isEditable ? 3 : 0)
+                        .disabled(!isEditable)
+                        .padding(.top, 25)
+                    }
+                    Text(!isEditable ? "Email   \(model.candidate.email)" : "Email")
+                        .font(.system(size: 22, weight: .bold))
+                        .padding(.top, 25)
+                    if isEditable {
+                        TextField("\(model.originalCandidateValue.email)", text: $model.candidate.email)
+                            .textFieldStyle(.plain)
+                            .border(.black, width: isEditable ? 3 : 0)
+                            .disabled(!isEditable)
+                            .padding(.top, 25)
+                    }
+                    if isEditable {
+                        Text("Linkedin")
+                            .font(.system(size: 22, weight: .bold))
+                        TextField("\(model.originalCandidateValue.linkedinURL ?? "")", text: Binding(
+                            get: { self.model.candidate.linkedinURL ?? "" },
+                            set: { self.model.candidate.linkedinURL = $0 }
+                        ))
+                        .textFieldStyle(.plain)
+                        .border(.black, width: isEditable ? 3 : 0)
+                        .disabled(!isEditable)
+                        .padding(.top, 10)
+                    } else {
+                        HStack {
+                            Text("Linkedin")
+                                .font(.system(size: 22, weight: .bold))
+                            Spacer()
+                            Button {
+                                
+                            } label: {
+                                Text("Go on Linkedin")
+                            }
                         }
-                        .border(.black, width: 3)
+                        .padding(.top, 25)
+                    }
+                    VStack(alignment: .leading) {
+                        Text("Note")
+                            .font(.system(size: 22, weight: .bold))
+                        TextField("\(model.originalCandidateValue.note ?? "")", text: Binding(
+                            get: { self.model.candidate.note ?? "" },
+                            set: { self.model.candidate.note = $0 }
+                        ))
+                        .textFieldStyle(.plain)
+                        .disabled(!isEditable)
+                        .cornerRadius(10)
+                        .background(.white)
+                        .overlay (
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.gray, lineWidth: 1)
+                                .opacity(0.2)
+                        )
+                    }
+                    .padding(.top, 25)
+                    
                 }
-                
+                .padding(.top, 20)
             }
         }
         .padding(.horizontal, 20)
@@ -139,7 +155,7 @@ struct ProfilView: View {
                             title: Text("Alert !"),
                             message: Text("\(String(describing: model.alert?.description ?? "chc"))"),
                             dismissButton: .destructive(Text("Exit")))
-                            }
+                    }
                 }
             }
         }
