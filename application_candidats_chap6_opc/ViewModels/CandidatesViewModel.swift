@@ -22,19 +22,15 @@ class CandidatesViewModel: ObservableObject {
     @MainActor
     func getCandidates() async {
         let service = ApiServiceV2(session: session)
+        let request = await service.fetch(endpoint: .fetchCandidates, responseType: [Candidate].self)
         do {
-            let request = try await service.fetch(endpoint: .fetchCandidates, responseType: [Candidate].self)
-            switch request {
-            case .success(let response):
-                guard let response else { return }
-                self.candidats = response
-                self.allCandidates = self.candidats
-                print("Successfully fetch the candidates with first candidats : \(self.candidats[0])")
-            case .failure(let error):
-                //TO DO - rajouter une alerte
-                print(error)
-            }
+            let candidates = try request.get()
+            guard let candidates else { return }
+            self.candidats = candidates
+            self.allCandidates = self.candidats
+            print("Successfully fetch the candidates with first candidats : \(self.candidats[0])")
         } catch {
+            //TO DO - rajouter une alerte
             print(error)
         }
     }
@@ -56,18 +52,15 @@ class CandidatesViewModel: ObservableObject {
         let service = ApiServiceV2(session: session)
 
         for candidateToRemove in candidatesIdToRemove {
+            let request = await service.fetch(endpoint: .deleteCandidate(candidate: candidateToRemove.id.uuidString), responseType: EmptyResponse.self)
             do {
-                let request = try await service.fetch(endpoint: .deleteCandidate(candidate: candidateToRemove.id.uuidString), responseType: EmptyResponse.self)
-                switch request {
-                case .success(_):
-                    self.needToPresentAlert = true
-                    self.alert = .deleteCandidateSuccess(name: candidateToRemove.firstName + candidateToRemove.lastName)
-                    print("Successfully deleted candidate : \(candidateToRemove)")
-                case .failure(let error):
-                    //TO DO - rajouter une alerte
-                    print(error)
-                }
+                let candidateValueResponse = try request.get()
+                self.needToPresentAlert = true
+                self.alert = .deleteCandidateSuccess(name: candidateToRemove.firstName + candidateToRemove.lastName)
+                print("Successfully deleted candidate : \(candidateToRemove)")
+                    
             } catch {
+                //TO DO - rajouter une alerte
                 print(error)
             }
         }

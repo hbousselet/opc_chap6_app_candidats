@@ -44,27 +44,23 @@ class ProfilViewModel: ObservableObject {
     
     @MainActor
     func updateCandidateInformations(with candidate: Candidate) async {
-        let parameters = ["email": self.candidate.email,
-                          "note": self.candidate.note,
-                          "linkedinURL": self.candidate.linkedinURL,
-                          "firstName": self.candidate.firstName,
-                          "lastName": self.candidate.lastName,
-                          "phone": self.candidate.phone]
         let service = ApiServiceV2(session: session)
-
+        let request = await service.fetch(endpoint: .updateCandidate(candidate: candidate.id.uuidString,
+                                                                     email: self.candidate.email,
+                                                                     note: self.candidate.note,
+                                                                     linkedinURL: self.candidate.linkedinURL,
+                                                                     firstName: self.candidate.firstName,
+                                                                     lastName: self.candidate.lastName,
+                                                                     phone: self.candidate.phone),
+                                                                     responseType: Candidate.self)
         do {
-            let request = try await service.fetch(endpoint: .updateCandidate(candidate: candidate.id.uuidString), parametersBody: parameters as [String : Any], responseType: Candidate.self)
-            switch request {
-            case .success(let response):
-                self.needToPresentAlert = true
-                self.alert = .updateCandidateSuccess
-                print("Successfully updated candidate: \(String(describing: response))")
-            case .failure(let error):
-                //TO DO - rajouter une alerte
-                self.candidate = self.originalCandidateValue
-                print(error)
-            }
+            let update = try request.get()
+            self.needToPresentAlert = true
+            self.alert = .updateCandidateSuccess
+            print("Successfully updated candidate: \(String(describing: update?.firstName))")
         } catch {
+            //TO DO - rajouter une alerte
+            self.candidate = self.originalCandidateValue
             print(error)
         }
     }

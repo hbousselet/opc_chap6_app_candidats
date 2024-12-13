@@ -155,6 +155,8 @@ enum CustomErrors: Error, Equatable {
     case deleteCandidateSuccess(name: String)
     case favoriteCandidateSuccess(name: String)
     case updateCandidateSuccess
+    case cantCreateJSONParams
+    case errorSessionData
     
     var description: String {
         switch self {
@@ -194,6 +196,10 @@ enum CustomErrors: Error, Equatable {
             return "Updated favorite parameter for candidate: \(name)"
         case .updateCandidateSuccess:
             return "Successfully updated candidate informations."
+        case .cantCreateJSONParams:
+            return "Not able to turn parameters into JSON"
+        case .errorSessionData:
+            return "Error when performing the call."
         }
     }
 }
@@ -205,7 +211,7 @@ enum RouteV2 {
     case fetchCandidates
     case createCandidate
     case deleteCandidate(candidate: String)
-    case updateCandidate(candidate: String)
+    case updateCandidate(candidate: String, email: String, note: String?, linkedinURL: String?, firstName: String, lastName: String, phone: String?)
     case updateFavorite(candidate: String)
     
     var method: Methods {
@@ -229,12 +235,14 @@ enum RouteV2 {
         }
     }
   
-  var parameters: [String: Any]? {
+  var parameters: [String: Any?]? {
       switch self {
       case .auth(let email, let password):
-          return ["mail": email, "password": password]
+          return ["email": email, "password": password]
       case .userRegister(let email, let password, let firstName, let lastName):
-          return ["mail": email, "password": password, "firstName": firstName, "lastName": lastName]
+          return ["email": email, "password": password, "firstName": firstName, "lastName": lastName]
+      case .updateCandidate(_, let email, let note, let linkedinURL, let firstName, let lastName, let phone):
+          return ["email": email, "note": note,"linkedinURL": linkedinURL, "firstName": firstName, "lastName": lastName, "phone": phone].compactMapValues { $0 }
       default:
           return nil
       }
@@ -254,7 +262,7 @@ enum RouteV2 {
             return "candidate"
         case .deleteCandidate(let candidateId):
             return "candidate/\(candidateId)"
-        case .updateCandidate(let candidateId):
+        case .updateCandidate(let candidateId,_,_,_,_,_,_):
             return "candidate/\(candidateId)"
         case .updateFavorite(let candidateId):
             return "candidate/\(candidateId)/favorite"
@@ -278,11 +286,11 @@ class ApiServiceV2 {
     }
     
     func fetch<T: Decodable>(endpoint: RouteV2,
-                             responseType: T.Type) async throws -> Result<T?, CustomErrors> {
+                             responseType: T.Type) async -> Result<T?, CustomErrors> {
         
         guard let url = URL(string: websiteURL + endpoint.path) else {
             print("invalid URL")
-            return .failure(.invalidURL)
+            return .failure(CustomErrors.invalidURL)
         }
         
         var request = URLRequest(url: url)
@@ -297,22 +305,33 @@ class ApiServiceV2 {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         if let parametersBody = endpoint.parameters {
-            request.httpBody = try? JSONSerialization.data(withJSONObject: parametersBody, options: [])
-        }
-        let (data, response) = try await session.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse,
-              [200, 201].contains(httpResponse.statusCode) else {
-            return .failure(.invalidResponse)
-        }
-        
-        if data.isEmpty {
-            return .success(nil)
+            do {
+                request.httpBody = try JSONSerialization.data(withJSONObject: parametersBody, options: [])
+            } catch {
+                return .failure(.cantCreateJSONParams)
+            }
         }
         
-        guard let decodedData = try? JSONDecoder().decode(responseType, from: data) else {
-            return .failure(CustomErrors.invalidDecode)
+        do {
+            let (data, response) = try await session.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200..<300).contains(httpResponse.statusCode) else {
+                return .failure(CustomErrors.invalidResponse)
+            }
+            
+            if data.isEmpty {
+                return .success(nil)
+            }
+            
+            guard let decodedData = try? JSONDecoder().decode(responseType, from: data) else {
+                return .failure(CustomErrors.invalidDecode)
+            }
+            //String(data: decodedData, encoding: .utf8)
+            return .success(decodedData)
+          
+        } catch {
+            return .failure(.errorSessionData)
         }
-        //String(data: decodedData, encoding: .utf8)
-        return .success(decodedData)
     }
 }

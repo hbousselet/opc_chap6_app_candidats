@@ -10,7 +10,7 @@ import Foundation
 public func isRecipientWellFormattedForEmail(_ recipient: String) -> Bool {
     let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
     let emailPred = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
-    print("email enered: \(recipient) and isValid: \(emailPred.evaluate(with: recipient))")
+    print("email entered: \(recipient) and isValid: \(emailPred.evaluate(with: recipient))")
     return emailPred.evaluate(with: recipient)
 }
 

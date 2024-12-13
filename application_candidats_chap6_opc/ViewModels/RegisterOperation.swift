@@ -23,10 +23,6 @@ class RegisterOperation: ObservableObject {
     
     @MainActor
     func register() async {
-        let parameters = ["lastName": self.firstName,
-                          "password": self.password,
-                          "firstName": self.firstName,
-                          "email": self.email]
         
         checkFirstNameValidity()
         checkLastNameValidity()
@@ -37,22 +33,22 @@ class RegisterOperation: ObservableObject {
         if self.needToPresentAlert {
             return
         }
-        
         let service = ApiServiceV2(session: session)
+        
+        let request = await service.fetch(endpoint: .userRegister(email: self.email,
+                                                                  password: self.password,
+                                                                  firstName: self.lastName,
+                                                                  lastName: self.firstName), responseType: Register.self)
         do {
-            let request = try await service.fetch(endpoint: .userRegister(email: self.email, password: self.password, firstName: self.lastName, lastName: self.firstName), responseType: Register.self)
-            switch request {
-            case .success(_):
-                self.needToPresentAlert.toggle()
-                self.alert = .registerSuccess
-                print("Successfully registered")
-            case .failure(let error):
-                self.needToPresentAlert.toggle()
-                self.alert = error
-                print(error)
-            }
+            let response = try request.get()
+            self.needToPresentAlert.toggle()
+            self.alert = .registerSuccess
+            print("Successfully registered")
         } catch {
+            self.needToPresentAlert.toggle()
+            self.alert = error
             print(error)
+
         }
     }
     

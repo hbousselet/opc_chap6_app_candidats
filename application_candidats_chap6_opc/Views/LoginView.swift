@@ -18,12 +18,12 @@ struct LoginView: View {
                 Text("Login")
                     .font(.system(.largeTitle, design: .default, weight: .medium))
                 VStack() {
-                    CustomPrompt(title: "Email/Username", promptValue: $model.email) {}
+                    CustomPrompt(title: "Email/Username", promptValue: $model.email) 
                     CustomPassword(title: "Password", addForgotPasswordIndication: true, promptValue: $model.password)
                     Button {
                         isLoading = true
                         Task {
-                            try await model.login()
+                            await model.login()
                             if model.needToPresentAlert {
                                 shouldNavigate = false
                             } else {

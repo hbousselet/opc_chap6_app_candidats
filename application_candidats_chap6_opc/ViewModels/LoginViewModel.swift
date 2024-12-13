@@ -20,29 +20,24 @@ class LoginOperation: ObservableObject {
     }
     
     @MainActor
-  func login() async throws {
+  func login() async {
       let service = ApiServiceV2(session: session)
       if !isRecipientWellFormattedForEmail(email) {
           self.needToPresentAlert.toggle()
           self.alert = .invalidEmail
           return
       }
+      let result = await service.fetch(endpoint: .auth(email: self.email, password: self.password), responseType: Login.self)
       do {
-        let request = try await service.fetch(endpoint: .auth(email: self.email, password: self.password), responseType: Login.self)
-          switch request {
-          case .success(let response):
-              let userDefaults = UserDefaults.standard
-              userDefaults.set(response?.token, forKey: "token")
-              userDefaults.set(response?.isAdmin, forKey: "isAdmin")
-            print("Successfully login with email: \(email) with token : \(String(describing: response?.token))")
-          case .failure(let error):
-              //TO DO - rajouter une alerte
-              print(error)
-              alert = error
-              needToPresentAlert.toggle()
-          }
+          let auth = try result.get()
+          let userDefaults = UserDefaults.standard
+          userDefaults.set(auth?.token, forKey: "token")
+          userDefaults.set(auth?.isAdmin, forKey: "isAdmin")
+          print("Successfully login with email: \(email) with token : \(String(describing: auth?.token))")
       } catch {
           print(error)
+          alert = error
+          needToPresentAlert.toggle()
       }
     }
 }

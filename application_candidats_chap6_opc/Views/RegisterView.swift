@@ -24,11 +24,11 @@ struct RegisterView: View {
                 Text("Register")
                     .font(.system(.largeTitle, design: .default, weight: .medium))
                     .padding(.top, 20)
-                CustomPrompt(title: "First Name", promptValue: $model.firstName) {}
+                CustomPrompt(title: "First Name", promptValue: $model.firstName)
                     .padding(.top, 20)
-                CustomPrompt(title: "Last Name", promptValue: $model.lastName) {}
+                CustomPrompt(title: "Last Name", promptValue: $model.lastName)
                     .padding(.top, 20)
-                CustomPrompt(title: "Email", promptValue: $model.email) {}
+                CustomPrompt(title: "Email", promptValue: $model.email)
                     .padding(.top, 20)
                 CustomPassword(title: "Password", addForgotPasswordIndication: false , promptValue: $model.password)
                     .padding(.top, 20)
