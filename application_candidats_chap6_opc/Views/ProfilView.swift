@@ -57,6 +57,7 @@ struct ProfilView: View {
                             get: { self.model.candidate.phone ?? "" },
                             set: { self.model.candidate.phone = $0 }
                         ))
+                        .padding(8)
                         .textFieldStyle(.plain)
                         .border(.black, width: isEditable ? 3 : 0)
                         .disabled(!isEditable)
@@ -67,6 +68,7 @@ struct ProfilView: View {
                         .padding(.top, 25)
                     if isEditable {
                         TextField("\(model.originalCandidateValue.email)", text: $model.candidate.email)
+                            .padding(8)
                             .textFieldStyle(.plain)
                             .border(.black, width: isEditable ? 3 : 0)
                             .disabled(!isEditable)
@@ -79,6 +81,7 @@ struct ProfilView: View {
                             get: { self.model.candidate.linkedinURL ?? "" },
                             set: { self.model.candidate.linkedinURL = $0 }
                         ))
+                        .padding(8)
                         .textFieldStyle(.plain)
                         .border(.black, width: isEditable ? 3 : 0)
                         .disabled(!isEditable)
@@ -99,18 +102,19 @@ struct ProfilView: View {
                     VStack(alignment: .leading) {
                         Text("Note")
                             .font(.system(size: 22, weight: .bold))
-                        TextField("\(model.originalCandidateValue.note ?? "")", text: Binding(
+                        TextEditor(text: Binding(
                             get: { self.model.candidate.note ?? "" },
                             set: { self.model.candidate.note = $0 }
                         ))
+                        .frame(minHeight: 100)
+                        .padding(8)
                         .textFieldStyle(.plain)
                         .disabled(!isEditable)
                         .cornerRadius(10)
                         .background(.white)
                         .overlay (
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.gray, lineWidth: 1)
-                                .opacity(0.2)
+                                .stroke(Color.black, lineWidth: 3)
                         )
                     }
                     .padding(.top, 25)
