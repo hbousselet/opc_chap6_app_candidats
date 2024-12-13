@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import WebKit
 
 struct ProfilView: View {
     @Environment(\.dismiss) private var dismiss
@@ -91,10 +92,13 @@ struct ProfilView: View {
                             Text("Linkedin")
                                 .font(.system(size: 22, weight: .bold))
                             Spacer()
-                            Button {
-                                
-                            } label: {
-                                Text("Go on Linkedin")
+                            if model.candidate.linkedinURL != "" {
+                                Link("Go on Linkedin", destination: URL(string: (model.candidate.linkedinURL ?? "https://google.com"))!)
+                                    .padding(8)
+                                    .overlay {
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.black, lineWidth: 3)
+                                    }
                             }
                         }
                         .padding(.top, 25)
@@ -172,3 +176,16 @@ struct ProfilView: View {
         }
     }
 }
+
+
+//struct WebView: UIViewRepresentable {
+//    typealias UIViewType = <#type#>
+//    
+//    
+//    let webView: WKWebView
+//    
+//    init() {
+//        self.webView = WKWebView()
+//        
+//    }
+//}
