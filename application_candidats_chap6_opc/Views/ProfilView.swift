@@ -29,10 +29,17 @@ struct ProfilView: View {
                         if model.isAdmin {
                             Task {
                                 await model.updateFavorite(with: model.candidate)
+                                await model.getCandidate()
                             }
                         }
                     } label: {
-                        Image(systemName: "star.fill").foregroundStyle(.black)
+                        if model.candidate.isFavorite {
+                            Image(systemName: "star.fill")
+                                .foregroundStyle(.black)
+                        } else {
+                            Image(systemName: "star")
+                                .foregroundStyle(.black)
+                        }
                     }
                     .alert(isPresented: $model.needToPresentAlert) {
                         Alert(

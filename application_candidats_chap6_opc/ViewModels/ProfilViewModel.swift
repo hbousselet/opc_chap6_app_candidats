@@ -26,18 +26,16 @@ class ProfilViewModel: ObservableObject {
     @MainActor
     func updateFavorite(with candidate: Candidate) async {
         let service = ApiServiceV2(session: session)
+        
+        let request = await service.fetch(endpoint: .updateFavorite(candidate: candidate.id.uuidString), responseType: Candidate.self)
+
         do {
-            let request = try await service.fetch(endpoint: .updateFavorite(candidate: candidate.id.uuidString), responseType: Candidate.self)
-            switch request {
-            case .success(let response):
-                self.needToPresentAlert = true
-                self.alert = .favoriteCandidateSuccess(name: candidate.firstName + candidate.lastName)
-                print("Successfully update favorite: \(String(describing: response?.isFavorite))")
-            case .failure(let error):
-                //TO DO - rajouter une alerte
-                print(error)
-            }
+            let favorite = try request.get()
+            self.needToPresentAlert = true
+            self.alert = .favoriteCandidateSuccess(name: candidate.firstName + candidate.lastName)
+            print("Successfully update favorite: \(String(describing: favorite?.isFavorite))")
         } catch {
+            //TO DO - rajouter une alerte
             print(error)
         }
     }
@@ -61,6 +59,21 @@ class ProfilViewModel: ObservableObject {
         } catch {
             //TO DO - rajouter une alerte
             self.candidate = self.originalCandidateValue
+            print(error)
+        }
+    }
+    
+    @MainActor
+    func getCandidate() async {
+        let service = ApiServiceV2(session: session)
+        let request = await service.fetch(endpoint: .fetchCandidate(candidate: self.candidate.id.uuidString), responseType: Candidate.self)
+        do {
+            let candidate = try request.get()
+            guard let candidate else { return }
+            self.candidate = candidate
+            print("Successfully fetch the candidate : \(self.candidate.firstName)")
+        } catch {
+            //TO DO - rajouter une alerte
             print(error)
         }
     }

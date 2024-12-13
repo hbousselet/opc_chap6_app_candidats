@@ -54,7 +54,7 @@ class CandidatesViewModel: ObservableObject {
         for candidateToRemove in candidatesIdToRemove {
             let request = await service.fetch(endpoint: .deleteCandidate(candidate: candidateToRemove.id.uuidString), responseType: EmptyResponse.self)
             do {
-                let candidateValueResponse = try request.get()
+                let _ = try request.get()
                 self.needToPresentAlert = true
                 self.alert = .deleteCandidateSuccess(name: candidateToRemove.firstName + candidateToRemove.lastName)
                 print("Successfully deleted candidate : \(candidateToRemove)")
