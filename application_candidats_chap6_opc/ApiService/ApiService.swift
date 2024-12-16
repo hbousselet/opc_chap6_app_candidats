@@ -7,135 +7,6 @@
 
 import Foundation
 
-
-class ApiService {
-    let websiteURL = "http://127.0.0.1:8080/"
-    let session: URLSession
-
-    init(session: URLSession = URLSession.shared) {
-        self.session = session
-    }
-    
-    func fetch<T: Decodable>(endpoint: Endpoint,
-                             responseType: T.Type) async throws -> Result<T?, CustomErrors> {
-        
-        guard let url = URL(string: websiteURL + endpoint.route) else {
-            print("invalid URL")
-            return .failure(.invalidURL)
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = endpoint.httpMethod
-        
-        let userDefaults = UserDefaults.standard
-        
-        let savedToken = userDefaults.object(forKey: "token") as? String
-        let token = savedToken ?? ""
-        
-        request.setValue("Bearer " + token, forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = endpoint.method
-        
-        let (data, response) = try await session.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse,
-              [200, 201].contains(httpResponse.statusCode) else {
-            return .failure(.invalidResponse)
-        }
-        
-        if data.isEmpty {
-            return .success(nil)
-        }
-        
-        guard let decodedData = try? JSONDecoder().decode(responseType, from: data) else {
-            return .failure(CustomErrors.invalidDecode)
-        }
-        //String(data: decodedData, encoding: .utf8)
-        return .success(decodedData)
-    }
-}
-
-enum Endpoint {
-    case get(Route?, String?)
-    case put(Route?, String?, [String: Any?]?)
-    case delete(Route?, String?)
-    case post(Route?, [String: Any]?)
-    
-    var method: Data? {
-        switch self {
-        case .get:
-            return nil
-        case .put(_, _, let parameters):
-            if let parameters {
-                return try? JSONSerialization.data(withJSONObject: parameters, options: [])
-            } else {
-                return nil
-            }
-        case .delete:
-            return nil
-        case .post(_, let parameters):
-            if let parameters {
-                return try? JSONSerialization.data(withJSONObject: parameters, options: [])
-            } else {
-                return nil
-            }
-        }
-    }
-        
-        var httpMethod: String {
-            switch self {
-            case .get:
-                return "GET"
-            case .put:
-                return "PUT"
-            case .delete:
-                return "DELETE"
-            default:
-                return "POST"
-            }
-        }
-        
-        var route: String {
-            switch self {
-            case .put(let route, let id,_):
-                if let route, let id {
-                    if route == .updateFavorite {
-                        return "candidate/" + String("\(id)") + route.rawValue
-                    } else {
-                        return route.rawValue + String("/\(id)")
-                    }
-                } else {
-                    return ""
-                }
-            case .get(let route, let id):
-                if let route, let id {
-                    return route.rawValue + String("/\(id)")
-                } else {
-                    return ""
-                }
-            case .delete(let route, let id):
-                if let route, let id {
-                    return route.rawValue + String("/\(id)")
-                } else {
-                    return ""
-                }
-            case .post(let route,_):
-                if let route {
-                    return route.rawValue
-                } else {
-                    return ""
-                }
-            }
-        }
-    }
-
-enum Route: String {
-    case auth = "user/auth/"
-    case register = "user/register/"
-    case getCandidatesList = "candidate"
-    case getCandidateById = "candidate/"
-    case updateFavorite = "/favorite"
-}
-
 enum CustomErrors: Error, Equatable {
     case invalidResponse
     case invalidDecode
@@ -204,7 +75,7 @@ enum CustomErrors: Error, Equatable {
     }
 }
 
-enum RouteV2 {
+enum Route {
     case auth(email: String, password: String)
     case userRegister(email: String, password: String, firstName: String, lastName: String)
     case fetchCandidate(candidate: String)
@@ -277,7 +148,7 @@ enum RouteV2 {
   }
 }
 
-class ApiServiceV2 {
+class ApiService {
     let websiteURL = "http://127.0.0.1:8080/"
     let session: URLSession
 
@@ -285,7 +156,7 @@ class ApiServiceV2 {
         self.session = session
     }
     
-    func fetch<T: Decodable>(endpoint: RouteV2,
+    func fetch<T: Decodable>(endpoint: Route,
                              responseType: T.Type) async -> Result<T?, CustomErrors> {
         
         guard let url = URL(string: websiteURL + endpoint.path) else {
@@ -314,7 +185,7 @@ class ApiServiceV2 {
         
         do {
             let (data, response) = try await session.data(for: request)
-            
+            print(String(data: data, encoding: .utf8))
             guard let httpResponse = response as? HTTPURLResponse,
                   (200..<300).contains(httpResponse.statusCode) else {
                 return .failure(CustomErrors.invalidResponse)
@@ -334,4 +205,33 @@ class ApiServiceV2 {
             return .failure(.errorSessionData)
         }
     }
+}
+
+class MockURLProtocol: URLProtocol {
+    override class func canInit(with request: URLRequest) -> Bool {
+        true
+    }
+    
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        return request
+    }
+    
+    //This closure will take as its input a request and will return an HTTPURLResponse and some Data.
+    static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
+    
+    override func startLoading() {
+        guard let handler = MockURLProtocol.requestHandler else {
+//            XCTFail("No request provided")
+            return
+        }
+        do {
+            let (response, data) = try handler(request)
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didLoad: data)
+            client?.urlProtocolDidFinishLoading(self)
+        } catch {
+//            XCTFail("Error handling the request: \(error)")
+        }
+    }
+    override func stopLoading() {}
 }

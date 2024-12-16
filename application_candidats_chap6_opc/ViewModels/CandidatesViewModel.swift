@@ -15,14 +15,17 @@ class CandidatesViewModel: ObservableObject {
     var allCandidates: [Candidate] = []
     let session: URLSession
     
-    init() {
-        self.session = URLSession.shared
+    lazy var api: ApiService = {
+        ApiService(session: session)
+    }()
+    
+    init(session: URLSession? = nil) {
+        self.session = session ?? URLSession.shared
     }
     
     @MainActor
     func getCandidates() async {
-        let service = ApiServiceV2(session: session)
-        let request = await service.fetch(endpoint: .fetchCandidates, responseType: [Candidate].self)
+        let request = await api.fetch(endpoint: .fetchCandidates, responseType: [Candidate].self)
         do {
             let candidates = try request.get()
             guard let candidates else { return }
@@ -30,7 +33,6 @@ class CandidatesViewModel: ObservableObject {
             self.allCandidates = self.candidats
             print("Successfully fetch the candidates with first candidats : \(self.candidats[0])")
         } catch {
-            //TO DO - rajouter une alerte
             print(error)
         }
     }
@@ -49,22 +51,19 @@ class CandidatesViewModel: ObservableObject {
         //get candidatesId with needToBeDeleted == true
         let candidatesIdToRemove = self.candidats.filter { $0.needToBeDeleted == true }
         
-        let service = ApiServiceV2(session: session)
-
         for candidateToRemove in candidatesIdToRemove {
-            let request = await service.fetch(endpoint: .deleteCandidate(candidate: candidateToRemove.id.uuidString), responseType: EmptyResponse.self)
+            let request = await api.fetch(endpoint: .deleteCandidate(candidate: candidateToRemove.id.uuidString), responseType: EmptyResponse.self)
             do {
                 let _ = try request.get()
                 self.needToPresentAlert = true
                 self.alert = .deleteCandidateSuccess(name: candidateToRemove.firstName + candidateToRemove.lastName)
                 print("Successfully deleted candidate : \(candidateToRemove)")
-                    
             } catch {
-                //TO DO - rajouter une alerte
                 print(error)
+                self.needToPresentAlert = true
+                self.alert = .invalidResponse
             }
         }
-            await getCandidates()
     }
     
     func selectedCandidate(with candidateSelected: Candidate) {
@@ -75,7 +74,7 @@ class CandidatesViewModel: ObservableObject {
 struct Candidate: Decodable, Identifiable, Hashable {
     var phone: String?
     var note: String?
-    let id: UUID
+    var id: UUID
     var firstName: String
     var linkedinURL: String?
     var isFavorite: Bool
@@ -95,5 +94,4 @@ struct Candidate: Decodable, Identifiable, Hashable {
       }
 }
 
-// à modifier avec CodingKeys
 struct EmptyResponse: Decodable { }

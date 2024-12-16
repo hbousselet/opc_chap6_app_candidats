@@ -49,15 +49,16 @@ struct RegisterView: View {
                 .padding(.horizontal)
                 .padding(.top, 20)
                 .navigationBarBackButtonHidden(true)
-                .alert(isPresented: $model.needToPresentAlert) {
-                    Alert(
-                        title: Text("Alert !"),
-                        message: Text("\(String(describing: model.alert?.description ?? "error"))"),
-                        dismissButton: .destructive(Text("Exit"), action: {
-                            if model.alert == .registerSuccess {
-                                dismiss()
-                            }
-                        }))
+                .alert("Register new account", isPresented: $model.needToPresentAlert) {
+                    Button {
+                        if model.alert == .registerSuccess {
+                            dismiss()
+                        }
+                    } label: {
+                        Text("Exit")
+                    }
+                } message: {
+                    Text("\(String(describing: model.alert?.description ?? "chc"))")
                 }
             }
             .padding(.horizontal, 40)

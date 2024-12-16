@@ -98,6 +98,7 @@ struct CandidatesView: View {
                         // call the delete function
                         Task {
                             await viewModel.removeCandidates()
+                            await viewModel.getCandidates()
                         }
                     } label: {
                         Text("Delete")

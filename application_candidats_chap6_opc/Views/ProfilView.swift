@@ -42,11 +42,14 @@ struct ProfilView: View {
                                 .foregroundStyle(.black)
                         }
                     }
-                    .alert(isPresented: $model.needToPresentAlert) {
-                        Alert(
-                            title: Text("Alert !"),
-                            message: Text("\(String(describing: model.alert?.description ?? "chc"))"),
-                            dismissButton: .destructive(Text("Exit")))
+                    .alert("Update candidate informations", isPresented: $model.needToPresentAlert) {
+                        Button {
+                            
+                        } label: {
+                            Text("Exit")
+                        }
+                    } message: {
+                        Text("\(String(describing: model.alert?.description ?? "chc"))")
                     }
                 }
                 .padding(.top)
@@ -165,27 +168,17 @@ struct ProfilView: View {
                     } label: {
                         Text("Done")
                     }
-                    .alert(isPresented: $model.needToPresentAlert) {
-                        Alert(
-                            title: Text("Alert !"),
-                            message: Text("\(String(describing: model.alert?.description ?? "chc"))"),
-                            dismissButton: .destructive(Text("Exit")))
+                    .alert("Update favorite", isPresented: $model.needToPresentAlert) {
+                        Button {
+                            
+                        } label: {
+                            Text("Exit")
+                        }
+                    } message: {
+                        Text("\(String(describing: model.alert?.description ?? "chc"))")
                     }
                 }
             }
         }
     }
 }
-
-
-//struct WebView: UIViewRepresentable {
-//    typealias UIViewType = <#type#>
-//    
-//    
-//    let webView: WKWebView
-//    
-//    init() {
-//        self.webView = WKWebView()
-//        
-//    }
-//}

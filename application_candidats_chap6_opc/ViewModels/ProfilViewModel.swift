@@ -14,20 +14,24 @@ class ProfilViewModel: ObservableObject {
     @Published var needToPresentAlert = false
     
     var originalCandidateValue: Candidate
+    
     let session: URLSession
     
-    init(candidatToShow: Candidate) {
+    lazy var api: ApiService = {
+        ApiService(session: session)
+    }()
+    
+    init(candidatToShow: Candidate, session: URLSession? = nil) {
         self.originalCandidateValue = candidatToShow
         self.candidate = candidatToShow
         self.isAdmin = UserDefaults.standard.bool(forKey: "isAdmin")
-        self.session = URLSession.shared
+        self.session = session ?? URLSession.shared
     }
     
     @MainActor
     func updateFavorite(with candidate: Candidate) async {
-        let service = ApiServiceV2(session: session)
         
-        let request = await service.fetch(endpoint: .updateFavorite(candidate: candidate.id.uuidString), responseType: Candidate.self)
+        let request = await api.fetch(endpoint: .updateFavorite(candidate: candidate.id.uuidString), responseType: Candidate.self)
 
         do {
             let favorite = try request.get()
@@ -42,8 +46,7 @@ class ProfilViewModel: ObservableObject {
     
     @MainActor
     func updateCandidateInformations(with candidate: Candidate) async {
-        let service = ApiServiceV2(session: session)
-        let request = await service.fetch(endpoint: .updateCandidate(candidate: candidate.id.uuidString,
+        let request = await api.fetch(endpoint: .updateCandidate(candidate: candidate.id.uuidString,
                                                                      email: self.candidate.email,
                                                                      note: self.candidate.note,
                                                                      linkedinURL: self.candidate.linkedinURL,
@@ -65,8 +68,7 @@ class ProfilViewModel: ObservableObject {
     
     @MainActor
     func getCandidate() async {
-        let service = ApiServiceV2(session: session)
-        let request = await service.fetch(endpoint: .fetchCandidate(candidate: self.candidate.id.uuidString), responseType: Candidate.self)
+        let request = await api.fetch(endpoint: .fetchCandidate(candidate: self.candidate.id.uuidString), responseType: Candidate.self)
         do {
             let candidate = try request.get()
             guard let candidate else { return }

@@ -17,8 +17,12 @@ class RegisterOperation: ObservableObject {
     @Published var needToPresentAlert = false
     let session: URLSession
     
-    init() {
-        self.session = URLSession.shared
+    lazy var api: ApiService = {
+        ApiService(session: session)
+    }()
+    
+    init(session: URLSession? = nil) {
+        self.session = session ?? URLSession.shared
     }
     
     @MainActor
@@ -33,14 +37,13 @@ class RegisterOperation: ObservableObject {
         if self.needToPresentAlert {
             return
         }
-        let service = ApiServiceV2(session: session)
         
-        let request = await service.fetch(endpoint: .userRegister(email: self.email,
+        let request = await api.fetch(endpoint: .userRegister(email: self.email,
                                                                   password: self.password,
                                                                   firstName: self.lastName,
                                                                   lastName: self.firstName), responseType: Register.self)
         do {
-            let response = try request.get()
+            let _ = try request.get()
             self.needToPresentAlert.toggle()
             self.alert = .registerSuccess
             print("Successfully registered")
@@ -67,7 +70,7 @@ class RegisterOperation: ObservableObject {
     }
     
     private func checkPasswordValidity() {
-        if self.password.isEmpty && self.password.count > 3 {
+        if self.password.isEmpty || self.password.count < 3 {
             self.needToPresentAlert = true
             self.alert = .passwordIsEmpty
         }

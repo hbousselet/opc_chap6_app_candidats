@@ -42,6 +42,11 @@ struct LoginView: View {
                     .disabled(isLoading)
                     .padding()
                     .padding(.horizontal)
+                    .alert("Important message", isPresented: $model.needToPresentAlert) {
+                        Button("OK", role: .cancel) { }
+                    } message: {
+                        Text("Please read this.")
+                    }
                     .alert(isPresented: $model.needToPresentAlert) {
                         Alert(
                             title: Text("Alert !"),
