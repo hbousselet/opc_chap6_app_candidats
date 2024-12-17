@@ -13,14 +13,14 @@ struct RegisterViewModelTests {
     
     lazy var session: URLSession = {
         let configuration = URLSessionConfiguration.ephemeral
-        configuration.protocolClasses = [MockURLProtocol.self]
+        configuration.protocolClasses = [MockURLSessionProtocol.self]
         return URLSession(configuration: configuration)
     }()
 
-    @Test mutating func registerOkTest() async throws {
+    @Test mutating func registerOkTest() async {
         let mockRegister = "".data(using: .utf8)!
         
-        MockURLProtocol.requestHandler = { request in
+        MockURLSessionProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: URL(string: "https://www.google.com/")!,
                                            statusCode: 201,
                                            httpVersion: nil,
@@ -40,10 +40,10 @@ struct RegisterViewModelTests {
         #expect(registerViewModel.alert == CustomErrors.registerSuccess)
     }
     
-    @Test mutating func registerFirstNameEmptyNOkTest() async throws {
+    @Test mutating func registerFirstNameEmptyNOkTest() async {
         let mockRegister = "".data(using: .utf8)!
         
-        MockURLProtocol.requestHandler = { request in
+        MockURLSessionProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: URL(string: "https://www.google.com/")!,
                                            statusCode: 201,
                                            httpVersion: nil,
@@ -63,10 +63,10 @@ struct RegisterViewModelTests {
         #expect(registerViewModel.alert == CustomErrors.firstNameIsEmpty)
     }
     
-    @Test mutating func registerLastNameEmptyNOkTest() async throws {
+    @Test mutating func registerLastNameEmptyNOkTest() async {
         let mockRegister = "".data(using: .utf8)!
         
-        MockURLProtocol.requestHandler = { request in
+        MockURLSessionProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: URL(string: "https://www.google.com/")!,
                                            statusCode: 201,
                                            httpVersion: nil,
@@ -86,10 +86,10 @@ struct RegisterViewModelTests {
         #expect(registerViewModel.alert == CustomErrors.lastNameIsEmpty)
     }
     
-    @Test mutating func registerEmailIsEmptyTest() async throws {
+    @Test mutating func registerEmailIsEmptyTest() async {
         let mockRegister = "".data(using: .utf8)!
         
-        MockURLProtocol.requestHandler = { request in
+        MockURLSessionProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: URL(string: "https://www.google.com/")!,
                                            statusCode: 201,
                                            httpVersion: nil,
@@ -109,10 +109,10 @@ struct RegisterViewModelTests {
         #expect(registerViewModel.alert == CustomErrors.emailIsEmpty)
     }
     
-    @Test mutating func registerEmailIsNotValidTest() async throws {
+    @Test mutating func registerEmailIsNotValidTest() async {
         let mockRegister = "".data(using: .utf8)!
         
-        MockURLProtocol.requestHandler = { request in
+        MockURLSessionProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: URL(string: "https://www.google.com/")!,
                                            statusCode: 201,
                                            httpVersion: nil,
@@ -132,10 +132,10 @@ struct RegisterViewModelTests {
         #expect(registerViewModel.alert == CustomErrors.emailIsNotValid)
     }
     
-    @Test mutating func registerPasswordNotTheSameTest() async throws {
+    @Test mutating func registerPasswordNotTheSameTest() async {
         let mockRegister = "".data(using: .utf8)!
         
-        MockURLProtocol.requestHandler = { request in
+        MockURLSessionProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: URL(string: "https://www.google.com/")!,
                                            statusCode: 201,
                                            httpVersion: nil,
@@ -155,10 +155,10 @@ struct RegisterViewModelTests {
         #expect(registerViewModel.alert == CustomErrors.passwordNotTheSame)
     }
     
-    @Test mutating func registerPasswordIsEmptyTest() async throws {
+    @Test mutating func registerPasswordIsEmptyTest() async {
         let mockRegister = "".data(using: .utf8)!
         
-        MockURLProtocol.requestHandler = { request in
+        MockURLSessionProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: URL(string: "https://www.google.com/")!,
                                            statusCode: 201,
                                            httpVersion: nil,
@@ -181,7 +181,7 @@ struct RegisterViewModelTests {
     @Test mutating func registerPasswordIsTooSmallTest() async throws {
         let mockRegister = "".data(using: .utf8)!
         
-        MockURLProtocol.requestHandler = { request in
+        MockURLSessionProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: URL(string: "https://www.google.com/")!,
                                            statusCode: 201,
                                            httpVersion: nil,

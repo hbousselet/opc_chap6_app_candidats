@@ -29,15 +29,46 @@
 		A3FBAF542CF096C500352F49 /* application_candidats_chap6_opcUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = application_candidats_chap6_opcUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A31F3B912D10703100F2C552 /* Exceptions for "application_candidats_chap6_opcTests" folder in "application_candidats_chap6_opc" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Mock/ApiServiceMock.swift,
+				Tests/ApiServiceTests.swift,
+				Tests/CandidateViewModelTests.swift,
+				Tests/LoginViewModelTests.swift,
+				Tests/ProfilViewModelTests.swift,
+				Tests/RegisterViewModelTests.swift,
+			);
+			target = A3FBAF392CF096C200352F49 /* application_candidats_chap6_opc */;
+		};
+		A31F3B922D10703100F2C552 /* Exceptions for "application_candidats_chap6_opcTests" folder in "application_candidats_chap6_opcTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Mock/ApiServiceMock.swift,
+				Tests/ApiServiceTests.swift,
+				Tests/CandidateViewModelTests.swift,
+				Tests/LoginViewModelTests.swift,
+				Tests/ProfilViewModelTests.swift,
+				Tests/RegisterViewModelTests.swift,
+			);
+			target = A3FBAF492CF096C500352F49 /* application_candidats_chap6_opcTests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		A31F3B8B2D10703100F2C552 /* application_candidats_chap6_opcTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A31F3B912D10703100F2C552 /* Exceptions for "application_candidats_chap6_opcTests" folder in "application_candidats_chap6_opc" target */,
+				A31F3B922D10703100F2C552 /* Exceptions for "application_candidats_chap6_opcTests" folder in "application_candidats_chap6_opcTests" target */,
+			);
+			path = application_candidats_chap6_opcTests;
+			sourceTree = "<group>";
+		};
 		A3FBAF3C2CF096C200352F49 /* application_candidats_chap6_opc */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = application_candidats_chap6_opc;
-			sourceTree = "<group>";
-		};
-		A3FBAF4D2CF096C500352F49 /* application_candidats_chap6_opcTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = application_candidats_chap6_opcTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -71,8 +102,8 @@
 			isa = PBXGroup;
 			children = (
 				A3FBAF3C2CF096C200352F49 /* application_candidats_chap6_opc */,
-				A3FBAF4D2CF096C500352F49 /* application_candidats_chap6_opcTests */,
 				A3FBAF3B2CF096C200352F49 /* Products */,
+				A31F3B8B2D10703100F2C552 /* application_candidats_chap6_opcTests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -102,6 +133,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				A31F3B8B2D10703100F2C552 /* application_candidats_chap6_opcTests */,
 				A3FBAF3C2CF096C200352F49 /* application_candidats_chap6_opc */,
 			);
 			name = application_candidats_chap6_opc;
@@ -123,9 +155,6 @@
 			);
 			dependencies = (
 				A3FBAF4C2CF096C500352F49 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				A3FBAF4D2CF096C500352F49 /* application_candidats_chap6_opcTests */,
 			);
 			name = application_candidats_chap6_opcTests;
 			packageProductDependencies = (

@@ -13,14 +13,11 @@ class LoginOperation: ObservableObject {
     @Published var alert: CustomErrors?
     @Published var needToPresentAlert = false
     
-    let session: URLSession
+    let session = URLSession.shared
+    let api: ApiService?
     
-    lazy var api: ApiService = {
-        ApiService(session: session)
-    }()
-    
-    init(session: URLSession? = nil) {
-        self.session = session ?? URLSession.shared
+    init(serviceApi: ApiService? = nil) {
+        self.api = serviceApi ?? DefaultApiService(session: session)
     }
     
     @MainActor
@@ -30,13 +27,15 @@ class LoginOperation: ObservableObject {
           self.alert = .invalidEmail
           return
       }
-      let result = await api.fetch(endpoint: .auth(email: self.email, password: self.password), responseType: Login.self)
+      let result = await api?.fetch(endpoint: .auth(email: self.email, password: self.password), responseType: Login.self)
       do {
-          let auth = try result.get()
+          let auth = try result?.get()
           let userDefaults = UserDefaults.standard
-          userDefaults.set(auth?.token, forKey: "token")
-          userDefaults.set(auth?.isAdmin, forKey: "isAdmin")
-          print("Successfully login with email: \(email) with token : \(String(describing: auth?.token))")
+          if let auth {
+              userDefaults.set(auth.token, forKey: "token")
+              userDefaults.set(auth.isAdmin, forKey: "isAdmin")
+              print("Successfully login with email: \(email) with token : \(String(describing: auth.token))")
+          }
       } catch {
           print(error)
           alert = error

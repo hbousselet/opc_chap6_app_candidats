@@ -148,7 +148,26 @@ enum Route {
   }
 }
 
-class ApiService {
+protocol ApiService {
+    func fetch<T: Decodable>(endpoint: Route,
+                             responseType: T.Type) async -> Result<T?, CustomErrors>
+}
+
+class MockAPIService<D: Decodable>: ApiService {
+    var data: D?
+    var error: CustomErrors?
+    var shouldSuccess: Bool = true
+    
+    func fetch<T>(endpoint: Route, responseType: T.Type) async -> Result<T?, CustomErrors> where T : Decodable {
+        if shouldSuccess {
+            return .success(data! as? T)
+        } else {
+            return .failure(error!)
+        }
+    }
+}
+
+class DefaultApiService: ApiService {
     let websiteURL = "http://127.0.0.1:8080/"
     let session: URLSession
 
@@ -205,33 +224,4 @@ class ApiService {
             return .failure(.errorSessionData)
         }
     }
-}
-
-class MockURLProtocol: URLProtocol {
-    override class func canInit(with request: URLRequest) -> Bool {
-        true
-    }
-    
-    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
-        return request
-    }
-    
-    //This closure will take as its input a request and will return an HTTPURLResponse and some Data.
-    static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
-    
-    override func startLoading() {
-        guard let handler = MockURLProtocol.requestHandler else {
-//            XCTFail("No request provided")
-            return
-        }
-        do {
-            let (response, data) = try handler(request)
-            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-            client?.urlProtocol(self, didLoad: data)
-            client?.urlProtocolDidFinishLoading(self)
-        } catch {
-//            XCTFail("Error handling the request: \(error)")
-        }
-    }
-    override func stopLoading() {}
 }

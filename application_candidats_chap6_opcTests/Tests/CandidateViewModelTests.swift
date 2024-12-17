@@ -5,18 +5,24 @@
 //  Created by Hugues BOUSSELET on 15/12/2024.
 //
 
+@testable import application_candidats_chap6_opc
 import Testing
 import Foundation
-@testable import application_candidats_chap6_opc
+
 struct CandidateViewModelTests {
+    
+    //utiliser la méthode setup de l'autre lib
+    // renommer les noms des mocks
+    // mettre la logique given when then => https://martinfowler.com/bliki/GivenWhenThen.html
 
-    lazy var session: URLSession = {
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.protocolClasses = [MockURLProtocol.self]
-        return URLSession(configuration: configuration)
-    }()
-
-    @Test mutating func getCandidatesOkTest() async throws {
+    @Test func getCandidatesOkTest() async {
+        
+        lazy var session: URLSession = {
+            let configuration = URLSessionConfiguration.ephemeral
+            configuration.protocolClasses = [MockURLSessionProtocol.self]
+            return URLSession(configuration: configuration)
+        }()
+        
         let mockGetCandidates = """
 [
     {
@@ -42,7 +48,7 @@ struct CandidateViewModelTests {
 ]
 """.data(using: .utf8)!
         
-        MockURLProtocol.requestHandler = { request in
+        MockURLSessionProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: URL(string: "https://www.google.com/")!,
                                            statusCode: 200,
                                            httpVersion: nil,
@@ -57,7 +63,14 @@ struct CandidateViewModelTests {
         #expect(candidatesViewModel.candidats[0].email == "th.motas@gmail.com")
     }
 
-    @Test mutating func removeCandidateOkTest() async throws {
+    @Test func removeCandidateOkTest() async {
+        
+        lazy var session: URLSession = {
+            let configuration = URLSessionConfiguration.ephemeral
+            configuration.protocolClasses = [MockURLSessionProtocol.self]
+            return URLSession(configuration: configuration)
+        }()
+        
         let mockCandidates = """
 [
     {
@@ -83,7 +96,7 @@ struct CandidateViewModelTests {
 ]
 """.data(using: .utf8)!
         
-        MockURLProtocol.requestHandler = { request in
+        MockURLSessionProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: URL(string: "https://www.google.com/")!,
                                            statusCode: 200,
                                            httpVersion: nil,
@@ -101,7 +114,14 @@ struct CandidateViewModelTests {
         #expect(candidatesViewModel.alert == .deleteCandidateSuccess(name: candidatesViewModel.candidats[0].firstName + candidatesViewModel.candidats[0].lastName))
     }
     
-    @Test mutating func noCandidateToRemoveOkTest() async throws {
+    @Test func noCandidateToRemoveOkTest() async {
+        
+        lazy var session: URLSession = {
+            let configuration = URLSessionConfiguration.ephemeral
+            configuration.protocolClasses = [MockURLSessionProtocol.self]
+            return URLSession(configuration: configuration)
+        }()
+        
         let mockCandidates = """
 [
     {
@@ -127,7 +147,7 @@ struct CandidateViewModelTests {
 ]
 """.data(using: .utf8)!
         
-        MockURLProtocol.requestHandler = { request in
+        MockURLSessionProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: URL(string: "https://www.google.com/")!,
                                            statusCode: 200,
                                            httpVersion: nil,
@@ -143,7 +163,14 @@ struct CandidateViewModelTests {
         #expect(candidatesViewModel.needToPresentAlert == false)
     }
     
-    @Test mutating func filterFavoriteTest() async throws {
+    @Test func filterFavoriteTest() async {
+        
+        lazy var session: URLSession = {
+            let configuration = URLSessionConfiguration.ephemeral
+            configuration.protocolClasses = [MockURLSessionProtocol.self]
+            return URLSession(configuration: configuration)
+        }()
+        
         let mockCandidates = """
 [
     {
@@ -169,7 +196,7 @@ struct CandidateViewModelTests {
 ]
 """.data(using: .utf8)!
         
-        MockURLProtocol.requestHandler = { request in
+        MockURLSessionProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: URL(string: "https://www.google.com/")!,
                                            statusCode: 200,
                                            httpVersion: nil,
@@ -185,7 +212,14 @@ struct CandidateViewModelTests {
         #expect(candidatesViewModel.candidats[0].email == "th.motas@gmail.com")
     }
     
-    @Test mutating func filterByNameTest() async throws {
+    @Test func filterByNameTest() async {
+        
+        lazy var session: URLSession = {
+            let configuration = URLSessionConfiguration.ephemeral
+            configuration.protocolClasses = [MockURLSessionProtocol.self]
+            return URLSession(configuration: configuration)
+        }()
+        
         let mockCandidates = """
 [
     {
@@ -211,7 +245,7 @@ struct CandidateViewModelTests {
 ]
 """.data(using: .utf8)!
         
-        MockURLProtocol.requestHandler = { request in
+        MockURLSessionProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: URL(string: "https://www.google.com/")!,
                                            statusCode: 200,
                                            httpVersion: nil,
@@ -232,7 +266,14 @@ struct CandidateViewModelTests {
         #expect(candidatesViewModel.candidats[0].email == "th.motas@gmail.com")
     }
     
-    @Test mutating func selectedCandidateTest() async throws {
+    @Test func selectedCandidateTest() async {
+        
+            lazy var session: URLSession = {
+            let configuration = URLSessionConfiguration.ephemeral
+            configuration.protocolClasses = [MockURLSessionProtocol.self]
+            return URLSession(configuration: configuration)
+        }()
+        
         let mockCandidates = """
 [
     {
@@ -258,7 +299,7 @@ struct CandidateViewModelTests {
 ]
 """.data(using: .utf8)!
         
-        MockURLProtocol.requestHandler = { request in
+        MockURLSessionProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: URL(string: "https://www.google.com/")!,
                                            statusCode: 200,
                                            httpVersion: nil,
@@ -274,7 +315,14 @@ struct CandidateViewModelTests {
         #expect(candidatesViewModel.candidats[0].needToBeDeleted == true)
     }
     
-    @Test mutating func deleteCandidateNOKTest() async throws {
+    @Test func deleteCandidateNOKTest() async {
+        
+        lazy var session: URLSession = {
+            let configuration = URLSessionConfiguration.ephemeral
+            configuration.protocolClasses = [MockURLSessionProtocol.self]
+            return URLSession(configuration: configuration)
+        }()
+        
         let mockCandidates = """
 [
     {
@@ -300,7 +348,7 @@ struct CandidateViewModelTests {
 ]
 """.data(using: .utf8)!
         
-        MockURLProtocol.requestHandler = { request in
+        MockURLSessionProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: URL(string: "https://www.google.com/")!,
                                            statusCode: 200,
                                            httpVersion: nil,
@@ -314,7 +362,7 @@ struct CandidateViewModelTests {
         candidatesViewModel.candidats[0].needToBeDeleted = true
         candidatesViewModel.candidats[0].id = UUID()
         
-        MockURLProtocol.requestHandler = { request in
+        MockURLSessionProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: URL(string: "https://www.google.com/")!,
                                            statusCode: 300,
                                            httpVersion: nil,

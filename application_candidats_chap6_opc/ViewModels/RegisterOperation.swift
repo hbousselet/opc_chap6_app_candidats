@@ -17,8 +17,8 @@ class RegisterOperation: ObservableObject {
     @Published var needToPresentAlert = false
     let session: URLSession
     
-    lazy var api: ApiService = {
-        ApiService(session: session)
+    lazy var api: DefaultApiService = {
+        DefaultApiService(session: session)
     }()
     
     init(session: URLSession? = nil) {

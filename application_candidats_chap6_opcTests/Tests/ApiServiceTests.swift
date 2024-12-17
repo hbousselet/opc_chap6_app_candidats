@@ -9,15 +9,15 @@ import XCTest
 @testable import application_candidats_chap6_opc
 
 final class ApiServiceTest: XCTestCase {
-    lazy var session: URLSession = {
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.protocolClasses = [MockURLProtocol.self]
-        return URLSession(configuration: configuration)
-    }()
+    var session: URLSession!
+    var api: ApiService!
     
-    lazy var api: ApiService = {
-        ApiService(session: session)
-    }()
+    override func setUp() {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [MockURLSessionProtocol.self]
+        session = URLSession(configuration: configuration)
+        api = DefaultApiService(session: session)
+    }
     
     func testLoginOk() async throws {
         let mockLogin = """
@@ -27,7 +27,7 @@ final class ApiServiceTest: XCTestCase {
                 }
             """.data(using: .utf8)!
         
-        MockURLProtocol.requestHandler = { request in
+        MockURLSessionProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: URL(string: "https://www.google.com/")!,
                                                     statusCode: 200,
                                                     httpVersion: nil,
@@ -50,7 +50,7 @@ final class ApiServiceTest: XCTestCase {
     func testLoginInvalidData() async throws {
         let invalidJSONData = "invalid JSON".data(using: .utf8)!
         
-        MockURLProtocol.requestHandler = { request in
+        MockURLSessionProtocol.requestHandler = { request in
             let invalidJSONResponse = HTTPURLResponse(
                 url: URL(string: "https://example.com")!,
                 statusCode: 200,
@@ -81,7 +81,7 @@ final class ApiServiceTest: XCTestCase {
                 }
             """.data(using: .utf8)!
         
-        MockURLProtocol.requestHandler = { request in
+        MockURLSessionProtocol.requestHandler = { request in
             let invalidJSONResponse = HTTPURLResponse(
                 url: URL(string: "https://example.com")!,
                 statusCode: 300,
@@ -112,7 +112,7 @@ final class ApiServiceTest: XCTestCase {
                 }
             """.data(using: .utf8)!
         
-        MockURLProtocol.requestHandler = { request in
+        MockURLSessionProtocol.requestHandler = { request in
             let response = HTTPURLResponse(url: URL(string: "https://www.google.com/")!,
                                                     statusCode: 200,
                                                     httpVersion: nil,

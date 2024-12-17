@@ -17,8 +17,8 @@ class ProfilViewModel: ObservableObject {
     
     let session: URLSession
     
-    lazy var api: ApiService = {
-        ApiService(session: session)
+    lazy var api: DefaultApiService = {
+        DefaultApiService(session: session)
     }()
     
     init(candidatToShow: Candidate, session: URLSession? = nil) {
@@ -39,8 +39,9 @@ class ProfilViewModel: ObservableObject {
             self.alert = .favoriteCandidateSuccess(name: candidate.firstName + candidate.lastName)
             print("Successfully update favorite: \(String(describing: favorite?.isFavorite))")
         } catch {
-            //TO DO - rajouter une alerte
             print(error)
+            self.needToPresentAlert = true
+            self.alert = CustomErrors.invalidResponse
         }
     }
     
