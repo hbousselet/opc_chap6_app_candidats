@@ -13,21 +13,18 @@ class CandidatesViewModel: ObservableObject {
     @Published var needToPresentAlert = false
     
     var allCandidates: [Candidate] = []
-    let session: URLSession
+    let session = URLSession.shared
+    let api: ApiService?
     
-    lazy var api: DefaultApiService = {
-        DefaultApiService(session: session)
-    }()
-    
-    init(session: URLSession? = nil) {
-        self.session = session ?? URLSession.shared
+    init(serviceApi: ApiService? = nil) {
+        self.api = serviceApi ?? DefaultApiService(session: session)
     }
     
     @MainActor
     func getCandidates() async {
-        let request = await api.fetch(endpoint: .fetchCandidates, responseType: [Candidate].self)
+        let request = await api?.fetch(endpoint: .fetchCandidates, responseType: [Candidate].self)
         do {
-            let candidates = try request.get()
+            let candidates = try request?.get()
             guard let candidates else { return }
             self.candidats = candidates
             self.allCandidates = self.candidats
@@ -52,9 +49,9 @@ class CandidatesViewModel: ObservableObject {
         let candidatesIdToRemove = self.candidats.filter { $0.needToBeDeleted == true }
         
         for candidateToRemove in candidatesIdToRemove {
-            let request = await api.fetch(endpoint: .deleteCandidate(candidate: candidateToRemove.id.uuidString), responseType: EmptyResponse.self)
+            let request = await api?.fetch(endpoint: .deleteCandidate(candidate: candidateToRemove.id.uuidString), responseType: EmptyResponse.self)
             do {
-                let _ = try request.get()
+                let _ = try request?.get()
                 self.needToPresentAlert = true
                 self.alert = .deleteCandidateSuccess(name: candidateToRemove.firstName + candidateToRemove.lastName)
                 print("Successfully deleted candidate : \(candidateToRemove)")

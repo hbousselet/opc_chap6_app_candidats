@@ -15,26 +15,23 @@ class ProfilViewModel: ObservableObject {
     
     var originalCandidateValue: Candidate
     
-    let session: URLSession
+    let session = URLSession.shared
+    let api: ApiService?
     
-    lazy var api: DefaultApiService = {
-        DefaultApiService(session: session)
-    }()
-    
-    init(candidatToShow: Candidate, session: URLSession? = nil) {
+    init(candidatToShow: Candidate, serviceApi: ApiService? = nil) {
         self.originalCandidateValue = candidatToShow
         self.candidate = candidatToShow
         self.isAdmin = UserDefaults.standard.bool(forKey: "isAdmin")
-        self.session = session ?? URLSession.shared
+        self.api = serviceApi ?? DefaultApiService(session: session)
     }
     
     @MainActor
     func updateFavorite(with candidate: Candidate) async {
         
-        let request = await api.fetch(endpoint: .updateFavorite(candidate: candidate.id.uuidString), responseType: Candidate.self)
+        let request = await api?.fetch(endpoint: .updateFavorite(candidate: candidate.id.uuidString), responseType: Candidate.self)
 
         do {
-            let favorite = try request.get()
+            let favorite = try request?.get()
             self.needToPresentAlert = true
             self.alert = .favoriteCandidateSuccess(name: candidate.firstName + candidate.lastName)
             print("Successfully update favorite: \(String(describing: favorite?.isFavorite))")
@@ -47,7 +44,7 @@ class ProfilViewModel: ObservableObject {
     
     @MainActor
     func updateCandidateInformations(with candidate: Candidate) async {
-        let request = await api.fetch(endpoint: .updateCandidate(candidate: candidate.id.uuidString,
+        let request = await api?.fetch(endpoint: .updateCandidate(candidate: candidate.id.uuidString,
                                                                      email: self.candidate.email,
                                                                      note: self.candidate.note,
                                                                      linkedinURL: self.candidate.linkedinURL,
@@ -56,7 +53,7 @@ class ProfilViewModel: ObservableObject {
                                                                      phone: self.candidate.phone),
                                                                      responseType: Candidate.self)
         do {
-            let update = try request.get()
+            let update = try request?.get()
             self.needToPresentAlert = true
             self.alert = .updateCandidateSuccess
             print("Successfully updated candidate: \(String(describing: update?.firstName))")
@@ -69,9 +66,9 @@ class ProfilViewModel: ObservableObject {
     
     @MainActor
     func getCandidate() async {
-        let request = await api.fetch(endpoint: .fetchCandidate(candidate: self.candidate.id.uuidString), responseType: Candidate.self)
+        let request = await api?.fetch(endpoint: .fetchCandidate(candidate: self.candidate.id.uuidString), responseType: Candidate.self)
         do {
-            let candidate = try request.get()
+            let candidate = try request?.get()
             guard let candidate else { return }
             self.candidate = candidate
             print("Successfully fetch the candidate : \(self.candidate.firstName)")

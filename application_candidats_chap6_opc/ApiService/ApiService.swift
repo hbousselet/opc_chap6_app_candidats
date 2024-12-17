@@ -7,6 +7,84 @@
 
 import Foundation
 
+protocol ApiService {
+    func fetch<T: Decodable>(endpoint: Route,
+                             responseType: T.Type) async -> Result<T?, CustomErrors>
+}
+
+class MockAPIService<D: Decodable>: ApiService {
+    var data: D?
+    var error: CustomErrors?
+    var shouldSuccess: Bool = true
+    
+    func fetch<T>(endpoint: Route, responseType: T.Type) async -> Result<T?, CustomErrors> where T : Decodable {
+        if shouldSuccess {
+            return .success(data! as? T)
+        } else {
+            return .failure(error!)
+        }
+    }
+}
+
+class DefaultApiService: ApiService {
+    let websiteURL = "http://127.0.0.1:8080/"
+    let session: URLSession
+
+    init(session: URLSession = URLSession.shared) {
+        self.session = session
+    }
+    
+    func fetch<T: Decodable>(endpoint: Route,
+                             responseType: T.Type) async -> Result<T?, CustomErrors> {
+        
+        guard let url = URL(string: websiteURL + endpoint.path) else {
+            print("invalid URL")
+            return .failure(CustomErrors.invalidURL)
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = endpoint.method.rawValue.uppercased()
+        
+        let userDefaults = UserDefaults.standard
+        
+        if let savedToken = userDefaults.object(forKey: "token") as? String {
+            request.setValue("Bearer " + savedToken, forHTTPHeaderField: "Authorization")
+        }
+        
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        if let parametersBody = endpoint.parameters {
+            do {
+                request.httpBody = try JSONSerialization.data(withJSONObject: parametersBody, options: [])
+            } catch {
+                return .failure(.cantCreateJSONParams)
+            }
+        }
+        
+        do {
+            let (data, response) = try await session.data(for: request)
+            print(String(data: data, encoding: .utf8))
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200..<300).contains(httpResponse.statusCode) else {
+                return .failure(CustomErrors.invalidResponse)
+            }
+            
+            if data.isEmpty {
+                return .success(nil)
+            }
+            
+            guard let decodedData = try? JSONDecoder().decode(responseType, from: data) else {
+                return .failure(CustomErrors.invalidDecode)
+            }
+            //String(data: decodedData, encoding: .utf8)
+            return .success(decodedData)
+          
+        } catch {
+            return .failure(.errorSessionData)
+        }
+    }
+}
+
 enum CustomErrors: Error, Equatable {
     case invalidResponse
     case invalidDecode
@@ -148,80 +226,4 @@ enum Route {
   }
 }
 
-protocol ApiService {
-    func fetch<T: Decodable>(endpoint: Route,
-                             responseType: T.Type) async -> Result<T?, CustomErrors>
-}
 
-class MockAPIService<D: Decodable>: ApiService {
-    var data: D?
-    var error: CustomErrors?
-    var shouldSuccess: Bool = true
-    
-    func fetch<T>(endpoint: Route, responseType: T.Type) async -> Result<T?, CustomErrors> where T : Decodable {
-        if shouldSuccess {
-            return .success(data! as? T)
-        } else {
-            return .failure(error!)
-        }
-    }
-}
-
-class DefaultApiService: ApiService {
-    let websiteURL = "http://127.0.0.1:8080/"
-    let session: URLSession
-
-    init(session: URLSession = URLSession.shared) {
-        self.session = session
-    }
-    
-    func fetch<T: Decodable>(endpoint: Route,
-                             responseType: T.Type) async -> Result<T?, CustomErrors> {
-        
-        guard let url = URL(string: websiteURL + endpoint.path) else {
-            print("invalid URL")
-            return .failure(CustomErrors.invalidURL)
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = endpoint.method.rawValue.uppercased()
-        
-        let userDefaults = UserDefaults.standard
-        
-        if let savedToken = userDefaults.object(forKey: "token") as? String {
-            request.setValue("Bearer " + savedToken, forHTTPHeaderField: "Authorization")
-        }
-        
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        if let parametersBody = endpoint.parameters {
-            do {
-                request.httpBody = try JSONSerialization.data(withJSONObject: parametersBody, options: [])
-            } catch {
-                return .failure(.cantCreateJSONParams)
-            }
-        }
-        
-        do {
-            let (data, response) = try await session.data(for: request)
-            print(String(data: data, encoding: .utf8))
-            guard let httpResponse = response as? HTTPURLResponse,
-                  (200..<300).contains(httpResponse.statusCode) else {
-                return .failure(CustomErrors.invalidResponse)
-            }
-            
-            if data.isEmpty {
-                return .success(nil)
-            }
-            
-            guard let decodedData = try? JSONDecoder().decode(responseType, from: data) else {
-                return .failure(CustomErrors.invalidDecode)
-            }
-            //String(data: decodedData, encoding: .utf8)
-            return .success(decodedData)
-          
-        } catch {
-            return .failure(.errorSessionData)
-        }
-    }
-}

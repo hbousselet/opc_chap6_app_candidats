@@ -15,14 +15,12 @@ class RegisterOperation: ObservableObject {
     @Published var lastName: String = ""
     @Published var alert: CustomErrors?
     @Published var needToPresentAlert = false
-    let session: URLSession
     
-    lazy var api: DefaultApiService = {
-        DefaultApiService(session: session)
-    }()
+    let session = URLSession.shared
+    let api: ApiService?
     
-    init(session: URLSession? = nil) {
-        self.session = session ?? URLSession.shared
+    init(serviceApi: ApiService? = nil) {
+        self.api = serviceApi ?? DefaultApiService(session: session)
     }
     
     @MainActor
@@ -38,12 +36,12 @@ class RegisterOperation: ObservableObject {
             return
         }
         
-        let request = await api.fetch(endpoint: .userRegister(email: self.email,
+        let request = await api?.fetch(endpoint: .userRegister(email: self.email,
                                                                   password: self.password,
                                                                   firstName: self.lastName,
                                                                   lastName: self.firstName), responseType: Register.self)
         do {
-            let _ = try request.get()
+            let _ = try request?.get()
             self.needToPresentAlert.toggle()
             self.alert = .registerSuccess
             print("Successfully registered")
