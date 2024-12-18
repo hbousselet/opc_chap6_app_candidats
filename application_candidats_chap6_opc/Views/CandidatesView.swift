@@ -97,7 +97,7 @@ struct CandidatesView: View {
                         isEditable.toggle()
                         // call the delete function
                         Task {
-                            await viewModel.removeCandidates()
+                            await viewModel.deleteCandidates()
                             await viewModel.getCandidates()
                         }
                     } label: {

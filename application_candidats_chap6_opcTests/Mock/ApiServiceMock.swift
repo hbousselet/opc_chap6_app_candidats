@@ -8,6 +8,7 @@
 import Foundation
 
 class MockURLSessionProtocol: URLProtocol {
+    
     override class func canInit(with request: URLRequest) -> Bool {
         true
     }
@@ -20,18 +21,16 @@ class MockURLSessionProtocol: URLProtocol {
     static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
     
     override func startLoading() {
-        guard let handler = MockURLSessionProtocol.requestHandler else {
-//            XCTFail("No request provided")
-            return
-        }
+        guard let handler = MockURLSessionProtocol.requestHandler else { return }
         do {
             let (response, data) = try handler(request)
             client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
             client?.urlProtocol(self, didLoad: data)
             client?.urlProtocolDidFinishLoading(self)
         } catch {
-//            XCTFail("Error handling the request: \(error)")
+            print(error)
         }
     }
+    
     override func stopLoading() {}
 }

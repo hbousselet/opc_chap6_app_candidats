@@ -161,7 +161,7 @@ final class ApiServiceTest: XCTestCase {
         let fakeEmail = "hug.bou@gmail.com"
         let fakePassword = "toto123"
         
-        let result = await api.fetch(endpoint: .auth(email: fakeEmail, password: fakePassword), responseType: Login.self)
+        let result = await apiService.fetch(endpoint: .auth(email: fakeEmail, password: fakePassword), responseType: Login.self)
         do {
             let auth = try result.get()
             XCTAssertNil(auth)

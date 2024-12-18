@@ -64,7 +64,6 @@ class DefaultApiService: ApiService {
         do {
             let (data, response) = try await session.data(for: request)
             
-            print(String(data: data, encoding: .utf8))
             guard let httpResponse = response as? HTTPURLResponse,
                   (200..<300).contains(httpResponse.statusCode) else {
                 return .failure(CustomErrors.invalidResponse)
@@ -77,7 +76,6 @@ class DefaultApiService: ApiService {
             guard let decodedData = try? JSONDecoder().decode(responseType, from: data) else {
                 return .failure(CustomErrors.invalidDecode)
             }
-            //String(data: decodedData, encoding: .utf8)
             return .success(decodedData)
           
         } catch {

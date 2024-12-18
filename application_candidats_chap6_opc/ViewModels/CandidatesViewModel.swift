@@ -45,7 +45,7 @@ class CandidatesViewModel: ObservableObject {
     }
     
     @MainActor
-    func removeCandidates() async {
+    func deleteCandidates() async {
         //get candidatesId with needToBeDeleted == true
         let candidatesIdToRemove = self.candidates.filter { $0.needToBeDeleted == true }
         
