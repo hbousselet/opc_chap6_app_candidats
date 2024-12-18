@@ -19,7 +19,7 @@ final class ApiServiceTest: XCTestCase {
         api = DefaultApiService(session: session)
     }
     
-    func testLoginOk() async throws {
+    func testWithLoginOk() async throws {
         let mockLogin = """
                 {
                     "isAdmin": true,
@@ -37,9 +37,9 @@ final class ApiServiceTest: XCTestCase {
         let fakeEmail = "hug.bou@gmail.com"
         let fakePassword = "toto123"
         
-        let result = await api.fetch(endpoint: .auth(email: fakeEmail, password: fakePassword), responseType: Login.self)
+        let authentication = await api.fetch(endpoint: .auth(email: fakeEmail, password: fakePassword), responseType: Login.self)
         do {
-            let auth = try result.get()
+            let auth = try authentication.get()
             XCTAssertEqual(auth?.isAdmin, true)
             XCTAssertEqual(auth?.token, "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImFkbWluQHZpdGVzc2UuY29tIiwiaXNBZG1pbiI6dHJ1ZX0.66y2jHqt-w3dQgc-W9sHMBhDN7BIHOq8X7IL3H--NzY")
         } catch {
@@ -47,7 +47,30 @@ final class ApiServiceTest: XCTestCase {
         }
     }
     
-    func testLoginInvalidData() async throws {
+    func testWithRemoveCandidateEmptyDataOk() async {
+        let mockRemoveCandidate = "".data(using: .utf8)!
+        
+        MockURLSessionProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(url: URL(string: "https://www.google.com/")!,
+                                                    statusCode: 200,
+                                                    httpVersion: nil,
+                                                    headerFields: [:])!
+            return (response, mockRemoveCandidate)
+        }
+        
+        let fakeUUID = UUID().uuidString
+        
+        let removeCandidate = await api.fetch(endpoint: .deleteCandidate(candidate: fakeUUID), responseType: EmptyResponse.self)
+        do {
+            let didRemoveCandidate = try removeCandidate.get()
+            XCTAssertNil(didRemoveCandidate)
+        } catch {
+            XCTAssertNil(error)
+        }
+        
+    }
+    
+    func testWithLoginInvalidData() async throws {
         let invalidJSONData = "invalid JSON".data(using: .utf8)!
         
         MockURLSessionProtocol.requestHandler = { request in
@@ -63,17 +86,17 @@ final class ApiServiceTest: XCTestCase {
         let fakeEmail = "hug.bou@gmail.com"
         let fakePassword = "toto123"
         
-        let result = await api.fetch(endpoint: .auth(email: fakeEmail, password: fakePassword), responseType: Login.self)
+        let authentication = await api.fetch(endpoint: .auth(email: fakeEmail, password: fakePassword), responseType: Login.self)
         
         do {
-            let auth = try result.get()
+            let auth = try authentication.get()
             XCTAssertNil(auth)
         } catch {
             XCTAssert(error == CustomErrors.invalidDecode)
         }
     }
     
-    func testLoginInvalidResponse() async throws {
+    func testWithLoginInvalidResponse() async throws {
         let mockLogin = """
                 {
                     "isAdmin": true,
@@ -94,17 +117,17 @@ final class ApiServiceTest: XCTestCase {
         let fakeEmail = "hug.bou@gmail.com"
         let fakePassword = "toto123"
         
-        let result = await api.fetch(endpoint: .auth(email: fakeEmail, password: fakePassword), responseType: Login.self)
+        let authentication = await api.fetch(endpoint: .auth(email: fakeEmail, password: fakePassword), responseType: Login.self)
         
         do {
-            let auth = try result.get()
+            let auth = try authentication.get()
             XCTAssertNil(auth)
         } catch {
             XCTAssert(error == CustomErrors.invalidResponse)
         }
     }
     
-    func testLoginInvalidDecode() async throws {
+    func testWithLoginInvalidDecode() async throws {
         let mockLogin = """
                 {
                     "isNotAdmin": true,
@@ -128,6 +151,22 @@ final class ApiServiceTest: XCTestCase {
             XCTAssertNil(auth)
         } catch {
             XCTAssert(error == CustomErrors.invalidDecode)
+        }
+    }
+    
+    func testWithErrorSessionDataNOk() async {
+        //deactivate the API Service
+        let apiService = DefaultApiService(session: .shared)
+        
+        let fakeEmail = "hug.bou@gmail.com"
+        let fakePassword = "toto123"
+        
+        let result = await api.fetch(endpoint: .auth(email: fakeEmail, password: fakePassword), responseType: Login.self)
+        do {
+            let auth = try result.get()
+            XCTAssertNil(auth)
+        } catch {
+            XCTAssert(error == CustomErrors.errorSessionData)
         }
     }
 }

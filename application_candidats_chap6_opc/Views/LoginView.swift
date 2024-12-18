@@ -45,13 +45,7 @@ struct LoginView: View {
                     .alert("Important message", isPresented: $model.needToPresentAlert) {
                         Button("OK", role: .cancel) { }
                     } message: {
-                        Text("Please read this.")
-                    }
-                    .alert(isPresented: $model.needToPresentAlert) {
-                        Alert(
-                            title: Text("Alert !"),
-                            message: Text("\(String(describing: model.alert?.description ?? "chc"))"),
-                            dismissButton: .destructive(Text("Exit")))
+                        Text("\(String(describing: model.alert?.description ?? "chc"))")
                     }
                     NavigationLink(isActive: $shouldNavigate) {
                         CandidatesView()

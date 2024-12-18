@@ -17,7 +17,7 @@ struct CandidatesView: View {
     
     var body: some View {
         NavigationStack {
-            List(viewModel.candidats) { candidat in
+            List(viewModel.candidates) { candidat in
                 HStack {
                     if isEditable {
                         Circle()
@@ -58,7 +58,7 @@ struct CandidatesView: View {
             .onChange(of: searchText) {
                 viewModel.filterCandidates(with: searchText)
                 if searchText == "" {
-                    viewModel.candidats = viewModel.allCandidates
+                    viewModel.candidates = viewModel.allCandidates
                 }
             }
         }
@@ -114,7 +114,7 @@ struct CandidatesView: View {
                         isFavoriteFilter.toggle()
                         viewModel.filterCandidates(with: "favorite")
                         if isFavoriteFilter == false {
-                            viewModel.candidats = viewModel.allCandidates
+                            viewModel.candidates = viewModel.allCandidates
                         }
                         
                     } label: {

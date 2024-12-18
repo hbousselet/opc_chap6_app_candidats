@@ -8,50 +8,51 @@
 import SwiftUI
 
 class CandidatesViewModel: ObservableObject {
-    @Published var candidats: [Candidate] = []
+    @Published var candidates: [Candidate] = []
     @Published var alert: CustomErrors?
     @Published var needToPresentAlert = false
     
     var allCandidates: [Candidate] = []
-    let session = URLSession.shared
-    let api: ApiService?
+    let api: ApiService
     
     init(serviceApi: ApiService? = nil) {
-        self.api = serviceApi ?? DefaultApiService(session: session)
+        self.api = serviceApi ?? DefaultApiService(session: .shared)
     }
     
     @MainActor
     func getCandidates() async {
-        let request = await api?.fetch(endpoint: .fetchCandidates, responseType: [Candidate].self)
+        let fetchCandidates = await api.fetch(endpoint: .fetchCandidates, responseType: [Candidate].self)
         do {
-            let candidates = try request?.get()
+            let candidates = try fetchCandidates.get()
             guard let candidates else { return }
-            self.candidats = candidates
-            self.allCandidates = self.candidats
-            print("Successfully fetch the candidates with first candidats : \(self.candidats[0])")
+            self.candidates = candidates
+            self.allCandidates = self.candidates
+            print("Successfully fetch the candidates with first candidats : \(self.candidates[0])")
         } catch {
             print(error)
+            self.needToPresentAlert = true
+            self.alert = .invalidResponse
         }
     }
     
     func filterCandidates(with filter: String) {
         switch filter {
         case "favorite":
-            self.candidats = allCandidates.filter { $0.isFavorite == true }
+            self.candidates = allCandidates.filter { $0.isFavorite == true }
         default:
-            self.candidats = allCandidates.filter { $0.firstName.lowercased().contains(filter.lowercased()) || $0.lastName.lowercased().contains(filter.lowercased()) }
+            self.candidates = allCandidates.filter { $0.firstName.lowercased().contains(filter.lowercased()) || $0.lastName.lowercased().contains(filter.lowercased()) }
         }
     }
     
     @MainActor
     func removeCandidates() async {
         //get candidatesId with needToBeDeleted == true
-        let candidatesIdToRemove = self.candidats.filter { $0.needToBeDeleted == true }
+        let candidatesIdToRemove = self.candidates.filter { $0.needToBeDeleted == true }
         
         for candidateToRemove in candidatesIdToRemove {
-            let request = await api?.fetch(endpoint: .deleteCandidate(candidate: candidateToRemove.id.uuidString), responseType: EmptyResponse.self)
+            let deleteCandidate = await api.fetch(endpoint: .deleteCandidate(candidate: candidateToRemove.id.uuidString), responseType: EmptyResponse.self)
             do {
-                let _ = try request?.get()
+                let _ = try deleteCandidate.get()
                 self.needToPresentAlert = true
                 self.alert = .deleteCandidateSuccess(name: candidateToRemove.firstName + candidateToRemove.lastName)
                 print("Successfully deleted candidate : \(candidateToRemove)")
@@ -64,7 +65,7 @@ class CandidatesViewModel: ObservableObject {
     }
     
     func selectedCandidate(with candidateSelected: Candidate) {
-        self.candidats[self.candidats.firstIndex { candid in candid.id == candidateSelected.id }!].needToBeDeleted.toggle()
+        self.candidates[self.candidates.firstIndex { candid in candid.id == candidateSelected.id }!].needToBeDeleted.toggle()
     }
 }
 

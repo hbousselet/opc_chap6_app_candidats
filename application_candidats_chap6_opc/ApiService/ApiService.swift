@@ -63,6 +63,7 @@ class DefaultApiService: ApiService {
         
         do {
             let (data, response) = try await session.data(for: request)
+            
             print(String(data: data, encoding: .utf8))
             guard let httpResponse = response as? HTTPURLResponse,
                   (200..<300).contains(httpResponse.statusCode) else {

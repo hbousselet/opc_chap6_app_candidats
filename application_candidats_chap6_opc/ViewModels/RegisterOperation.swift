@@ -16,16 +16,14 @@ class RegisterOperation: ObservableObject {
     @Published var alert: CustomErrors?
     @Published var needToPresentAlert = false
     
-    let session = URLSession.shared
-    let api: ApiService?
+    let api: ApiService
     
     init(serviceApi: ApiService? = nil) {
-        self.api = serviceApi ?? DefaultApiService(session: session)
+        self.api = serviceApi ?? DefaultApiService(session: .shared)
     }
     
     @MainActor
     func register() async {
-        
         checkFirstNameValidity()
         checkLastNameValidity()
         checkPasswordValidity()
@@ -36,12 +34,12 @@ class RegisterOperation: ObservableObject {
             return
         }
         
-        let request = await api?.fetch(endpoint: .userRegister(email: self.email,
-                                                                  password: self.password,
-                                                                  firstName: self.lastName,
-                                                                  lastName: self.firstName), responseType: Register.self)
+        let request = await api.fetch(endpoint: .userRegister(email: self.email,
+                                                              password: self.password,
+                                                              firstName: self.lastName,
+                                                              lastName: self.firstName), responseType: Register.self)
         do {
-            let _ = try request?.get()
+            let _ = try request.get()
             self.needToPresentAlert.toggle()
             self.alert = .registerSuccess
             print("Successfully registered")
@@ -49,7 +47,7 @@ class RegisterOperation: ObservableObject {
             self.needToPresentAlert.toggle()
             self.alert = error
             print(error)
-
+            
         }
     }
     
