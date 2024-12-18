@@ -97,11 +97,14 @@ struct ProfilView: View {
                             Spacer()
                             if model.candidate.linkedinURL != "" {
                                 Link("Go on Linkedin", destination: URL(string: (model.candidate.linkedinURL ?? "https://google.com"))!)
+                                    .foregroundStyle(.black)
                                     .padding(8)
+                                    .background(.blue)
                                     .overlay {
                                         RoundedRectangle(cornerRadius: 12)
                                             .stroke(Color.black, lineWidth: 3)
                                     }
+                                    .padding(.horizontal, 8)
                             }
                         }
                         .padding(.top, 25)

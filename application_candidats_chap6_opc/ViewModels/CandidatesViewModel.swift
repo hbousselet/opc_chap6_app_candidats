@@ -27,7 +27,6 @@ class CandidatesViewModel: ObservableObject {
             guard let candidates else { return }
             self.candidates = candidates
             self.allCandidates = self.candidates
-            print("Successfully fetch the candidates with first candidats : \(self.candidates[0])")
         } catch {
             print(error)
             self.needToPresentAlert = true

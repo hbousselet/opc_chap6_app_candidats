@@ -53,7 +53,6 @@ struct CandidatesView: View {
             }
             .listRowSeparator(.hidden)
             .listRowSpacing(8.0)
-//            .listStyle(.plain)
             .searchable(text: $searchText)
             .onChange(of: searchText) {
                 viewModel.filterCandidates(with: searchText)
@@ -95,7 +94,6 @@ struct CandidatesView: View {
                 if isEditable {
                     Button {
                         isEditable.toggle()
-                        // call the delete function
                         Task {
                             await viewModel.deleteCandidates()
                             await viewModel.getCandidates()
@@ -108,7 +106,7 @@ struct CandidatesView: View {
                             title: Text("Alert !"),
                             message: Text("\(String(describing: viewModel.alert?.description ?? "chc"))"),
                             dismissButton: .destructive(Text("Exit")))
-                            }
+                    }
                 } else {
                     Button {
                         isFavoriteFilter.toggle()
