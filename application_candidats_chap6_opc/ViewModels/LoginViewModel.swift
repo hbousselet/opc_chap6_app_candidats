@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@MainActor
 class LoginOperation: ObservableObject {
     @Published var email: String = ""
     @Published var password: String = ""
@@ -19,7 +20,6 @@ class LoginOperation: ObservableObject {
         self.api = serviceApi ?? DefaultApiService(session: .shared)
     }
     
-    @MainActor
     func login() async {
         if !isRecipientWellFormattedForEmail(email) {
             self.needToPresentAlert = true

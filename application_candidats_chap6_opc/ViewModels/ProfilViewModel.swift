@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@MainActor
 class ProfilViewModel: ObservableObject {
     @Published var candidate: Candidate
     @Published var isAdmin: Bool
@@ -23,7 +24,6 @@ class ProfilViewModel: ObservableObject {
         self.api = serviceApi ?? DefaultApiService(session: .shared)
     }
     
-    @MainActor
     func updateFavorite(with candidate: Candidate) async {
         let updateFavorite = await api.fetch(endpoint: .updateFavorite(candidate: candidate.id.uuidString), responseType: Candidate.self)
 
@@ -39,7 +39,6 @@ class ProfilViewModel: ObservableObject {
         }
     }
     
-    @MainActor
     func updateCandidateInformations(with candidate: Candidate) async {
         let updateCandidateInformations = await api.fetch(endpoint: .updateCandidate(candidate: candidate.id.uuidString,
                                                                      email: self.candidate.email,
@@ -62,7 +61,6 @@ class ProfilViewModel: ObservableObject {
         }
     }
     
-    @MainActor
     func getCandidate() async {
         let fetchCandidate = await api.fetch(endpoint: .fetchCandidate(candidate: self.candidate.id.uuidString), responseType: Candidate.self)
         do {

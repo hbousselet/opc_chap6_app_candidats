@@ -1,5 +1,5 @@
 //
-//  RegisterOperation.swift
+//  RegisterViewModel.swift
 //  application_candidats_chap6_opc
 //
 //  Created by Hugues Bousselet on 22/11/2024.
@@ -7,7 +7,8 @@
 
 import SwiftUI
 
-class RegisterOperation: ObservableObject {
+@MainActor
+class RegisterViewModel: ObservableObject {
     @Published var email: String = ""
     @Published var password: String = ""
     @Published var confirmedPassword: String = ""
@@ -22,7 +23,6 @@ class RegisterOperation: ObservableObject {
         self.api = serviceApi ?? DefaultApiService(session: .shared)
     }
     
-    @MainActor
     func register() async {
         checkFirstNameValidity()
         checkLastNameValidity()
@@ -34,12 +34,12 @@ class RegisterOperation: ObservableObject {
             return
         }
         
-        let request = await api.fetch(endpoint: .userRegister(email: self.email,
+        let result = await api.fetch(endpoint: .userRegister(email: self.email,
                                                               password: self.password,
                                                               firstName: self.lastName,
                                                               lastName: self.firstName), responseType: Register.self)
         do {
-            let _ = try request.get()
+            let _ = try result.get()
             self.needToPresentAlert.toggle()
             self.alert = .registerSuccess
             print("Successfully registered")

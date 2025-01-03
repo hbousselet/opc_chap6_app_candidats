@@ -8,6 +8,7 @@
 @testable import application_candidats_chap6_opc
 import XCTest
 
+@MainActor
 final class RegisterViewModelTests: XCTestCase {
     var api: MockAPIService<Register>!
     
@@ -23,7 +24,7 @@ final class RegisterViewModelTests: XCTestCase {
         api.error = nil
         api.shouldSuccess = true
         
-        let registerViewModel = RegisterOperation(serviceApi: api)
+        let registerViewModel = RegisterViewModel(serviceApi: api)
         registerViewModel.email = "hugues.bousselet@gmail.com"
         registerViewModel.password = "test123"
         registerViewModel.confirmedPassword = "test123"
@@ -41,7 +42,7 @@ final class RegisterViewModelTests: XCTestCase {
         api.error = .errorSessionData
         api.shouldSuccess = false
         
-        let registerViewModel = RegisterOperation(serviceApi: api)
+        let registerViewModel = RegisterViewModel(serviceApi: api)
         registerViewModel.email = "hugues.bousselet@gmail.com"
         registerViewModel.password = "test123"
         registerViewModel.confirmedPassword = "test123"
@@ -59,7 +60,7 @@ final class RegisterViewModelTests: XCTestCase {
         api.error = nil
         api.shouldSuccess = true
         
-        let registerViewModel = RegisterOperation(serviceApi: api)
+        let registerViewModel = RegisterViewModel(serviceApi: api)
         registerViewModel.email = "hugues.bousselet@gmail.com"
         registerViewModel.password = "test123"
         registerViewModel.confirmedPassword = "test123"
@@ -77,7 +78,7 @@ final class RegisterViewModelTests: XCTestCase {
         api.error = nil
         api.shouldSuccess = true
         
-        let registerViewModel = RegisterOperation(serviceApi: api)
+        let registerViewModel = RegisterViewModel(serviceApi: api)
         registerViewModel.email = "hugues.bousselet@gmail.com"
         registerViewModel.password = "test123"
         registerViewModel.confirmedPassword = "test123"
@@ -95,7 +96,7 @@ final class RegisterViewModelTests: XCTestCase {
         api.error = nil
         api.shouldSuccess = true
         
-        let registerViewModel = RegisterOperation(serviceApi: api)
+        let registerViewModel = RegisterViewModel(serviceApi: api)
         registerViewModel.email = "hugues.bousselet@gmail.com"
         registerViewModel.password = ""
         registerViewModel.confirmedPassword = ""
@@ -113,7 +114,7 @@ final class RegisterViewModelTests: XCTestCase {
         api.error = nil
         api.shouldSuccess = true
         
-        let registerViewModel = RegisterOperation(serviceApi: api)
+        let registerViewModel = RegisterViewModel(serviceApi: api)
         registerViewModel.email = "hugues.bousselet@gmail.com"
         registerViewModel.password = "12"
         registerViewModel.confirmedPassword = "12"
@@ -131,7 +132,7 @@ final class RegisterViewModelTests: XCTestCase {
         api.error = nil
         api.shouldSuccess = true
         
-        let registerViewModel = RegisterOperation(serviceApi: api)
+        let registerViewModel = RegisterViewModel(serviceApi: api)
         registerViewModel.email = "hugues.bousselet@gmail.com"
         registerViewModel.password = "Molotov"
         registerViewModel.confirmedPassword = "Withings"
@@ -149,7 +150,7 @@ final class RegisterViewModelTests: XCTestCase {
         api.error = nil
         api.shouldSuccess = true
         
-        let registerViewModel = RegisterOperation(serviceApi: api)
+        let registerViewModel = RegisterViewModel(serviceApi: api)
         registerViewModel.email = "hugues.bousselet@gmail"
         registerViewModel.password = "Molotov"
         registerViewModel.confirmedPassword = "Molotov"

@@ -8,6 +8,7 @@
 @testable import application_candidats_chap6_opc
 import XCTest
 
+@MainActor
 final class CandidatesViewModelTests: XCTestCase {
     var apiWithCandidateType: MockAPIService<[Candidate]>!
     var apiWithEmptyResponseType: MockAPIService<EmptyResponse>!

@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@MainActor
 class CandidatesViewModel: ObservableObject {
     @Published var candidates: [Candidate] = []
     @Published var alert: CustomErrors?
@@ -19,7 +20,6 @@ class CandidatesViewModel: ObservableObject {
         self.api = serviceApi ?? DefaultApiService(session: .shared)
     }
     
-    @MainActor
     func getCandidates() async {
         let fetchCandidates = await api.fetch(endpoint: .fetchCandidates, responseType: [Candidate].self)
         do {
@@ -43,7 +43,6 @@ class CandidatesViewModel: ObservableObject {
         }
     }
     
-    @MainActor
     func deleteCandidates() async {
         //get candidatesId with needToBeDeleted == true
         let candidatesIdToRemove = self.candidates.filter { $0.needToBeDeleted == true }

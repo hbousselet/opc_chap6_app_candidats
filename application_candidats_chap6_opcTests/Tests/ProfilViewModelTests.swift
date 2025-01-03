@@ -7,6 +7,7 @@
 @testable import application_candidats_chap6_opc
 import XCTest
 
+@MainActor
 final class ProfilViewModelTests: XCTestCase {
     var api: MockAPIService<Candidate>!
     

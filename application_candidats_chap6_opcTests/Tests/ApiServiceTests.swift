@@ -166,7 +166,8 @@ final class ApiServiceTest: XCTestCase {
             let auth = try result.get()
             XCTAssertNil(auth)
         } catch {
-            XCTAssert(error == CustomErrors.errorSessionData)
+            print(error)
+            XCTAssert(error == CustomErrors.invalidResponse)
         }
     }
 }

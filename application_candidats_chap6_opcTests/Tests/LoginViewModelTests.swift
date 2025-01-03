@@ -8,6 +8,7 @@
 @testable import application_candidats_chap6_opc
 import XCTest
 
+@MainActor
 final class LoginViewModelTests: XCTestCase {
     var api: MockAPIService<Login>!
     

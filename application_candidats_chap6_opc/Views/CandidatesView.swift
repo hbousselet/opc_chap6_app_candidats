@@ -61,10 +61,8 @@ struct CandidatesView: View {
                 }
             }
         }
-        .onAppear {
-            Task {
-                await viewModel.getCandidates()
-            }
+        .task {
+          await viewModel.getCandidates()
         }
         .refreshable {
             Task {
